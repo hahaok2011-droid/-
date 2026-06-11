@@ -5,7 +5,7 @@
 
 import React, { useState } from "react";
 import { Project, ColorSwatch, WorkflowStep, ToolSkill, Certification } from "../types";
-import { Lock, ShieldCheck, Check, Trash2, Plus, Edit3, RefreshCw, Save, Layers, Award, Hammer, Briefcase, Upload } from "lucide-react";
+import { Lock, ShieldCheck, Check, Trash2, Plus, Edit3, RefreshCw, Save, Layers, Award, Hammer, Briefcase, Upload, GripVertical } from "lucide-react";
 
 interface AdminPanelProps {
   projects: Project[];
@@ -187,6 +187,7 @@ export default function AdminPanel({
   // ==========================
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [draggedProjectIndex, setDraggedProjectIndex] = useState<number | null>(null);
 
   const [formId, setFormId] = useState("");
   const [formTitle, setFormTitle] = useState("");
@@ -246,13 +247,36 @@ export default function AdminPanel({
       setIsAdmin(true);
       setErrorMsg("");
     } else {
-      setErrorMsg("비밀번호가 올바르지 않습니다. (안내: 0610)");
+      setErrorMsg("비밀번호가 올바르지 않습니다.");
     }
   };
 
   // ==========================
   // PROJECT UTILS
   // ==========================
+  // Drag and drop reordering handlers
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedProjectIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedProjectIndex === null || draggedProjectIndex === index) return;
+
+    const updated = [...projects];
+    const draggedItem = updated[draggedProjectIndex];
+    updated.splice(draggedProjectIndex, 1);
+    updated.splice(index, 0, draggedItem);
+
+    setDraggedProjectIndex(index);
+    onUpdateProjects(updated);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedProjectIndex(null);
+  };
+
   const startEditProject = (p: Project) => {
     setEditingProject(p);
     setIsCreatingProject(false);
@@ -563,7 +587,7 @@ export default function AdminPanel({
             </div>
             <h4 className="text-sm font-semibold text-zinc-200 uppercase tracking-widest font-mono">ADMINISTRATOR AUTHORIZATION</h4>
             <p className="text-zinc-500 text-xs mt-1 leading-relaxed">
-              프로젝트 작품, 시공 프로세스 로드맵, 엔진 툴 역량 데이터를 실시간으로 동적 수정하려면 비밀번호 <strong className="text-zinc-400 font-mono">0610</strong>을 입력해 승인하십시오.
+              프로젝트 작품, 시공 프로세스 로드맵, 엔진 툴 역량 데이터를 실시간으로 동적 수정하려면 비밀번호를 입력해 승인하십시오.
             </p>
 
             <form onSubmit={handleLogin} className="mt-6 flex gap-2">
@@ -571,7 +595,7 @@ export default function AdminPanel({
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="비밀번호: 0610"
+                placeholder="비밀번호"
                 className="flex-1 bg-zinc-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white placeholder-zinc-700 font-mono focus:outline-none focus:border-red-500/50"
               />
               <button 
@@ -637,7 +661,9 @@ export default function AdminPanel({
                 {/* Left list panel */}
                 <div className="lg:col-span-4 bg-zinc-900/30 p-4 rounded-2xl border border-white/5 h-[450px] overflow-y-auto flex flex-col gap-3">
                   <div className="flex justify-between items-center mb-2 border-b border-white/5 pb-2">
-                    <span className="text-xs font-mono text-zinc-400 font-semibold uppercase">포트폴리오 목록</span>
+                    <span className="text-[11px] font-sans text-amber-500/90 font-bold uppercase tracking-tight">
+                      포트폴리오 목록 (드래그 순서 변경)
+                    </span>
                     <button 
                       onClick={startCreateProject}
                       className="bg-amber-500 hover:bg-amber-400 text-black text-[10px] font-sans font-bold px-2 py-1 rounded-md flex items-center gap-1.5 cursor-pointer"
@@ -646,27 +672,46 @@ export default function AdminPanel({
                     </button>
                   </div>
 
-                  {projects.map((p) => {
+                  {projects.map((p, idx) => {
                     const isActive = editingProject?.id === p.id;
+                    const isBeingDragged = draggedProjectIndex === idx;
                     return (
                       <div 
                         key={p.id}
-                        className={`flex items-center justify-between p-3 rounded-xl border transition-all text-xs ${
-                          isActive && !isCreatingProject
-                            ? "bg-red-500/[0.04] border-red-500/40 text-red-400 font-bold" 
-                            : "bg-zinc-950/40 border-white/5 text-zinc-300 hover:bg-zinc-800/20"
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, idx)}
+                        onDragOver={(e) => handleDragOver(e, idx)}
+                        onDragEnd={handleDragEnd}
+                        className={`flex items-center justify-between p-3 rounded-xl border transition-all text-xs select-none ${
+                          isBeingDragged 
+                            ? "opacity-20 border-red-500/70 bg-red-950/20" 
+                            : isActive && !isCreatingProject
+                              ? "bg-red-500/[0.04] border-red-500/40 text-red-400 font-bold" 
+                              : "bg-zinc-950/40 border-white/5 text-zinc-300 hover:bg-zinc-800/20"
                         }`}
                       >
-                        <button 
-                          onClick={() => startEditProject(p)}
-                          className="text-left font-sans flex-1 truncate pr-2 cursor-pointer"
-                        >
-                          <p className="font-semibold truncate">{p.title}</p>
-                          <p className="text-[10px] text-zinc-500 truncate">{p.tagline}</p>
-                        </button>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center flex-1 min-w-0 gap-1.5">
+                          {/* Drag handle */}
+                          <div 
+                            title="마우스로 잡고 끌어다 순서 바꾸기"
+                            className="p-1 -ml-1 text-zinc-650 hover:text-white cursor-grab active:cursor-grabbing flex-shrink-0"
+                          >
+                            <GripVertical className="w-3.5 h-3.5" />
+                          </div>
+
                           <button 
                             onClick={() => startEditProject(p)}
+                            type="button"
+                            className="text-left font-sans flex-1 truncate pr-2 cursor-pointer focus:outline-none"
+                          >
+                            <p className="font-semibold truncate">{p.title}</p>
+                            <p className="text-[10px] text-zinc-500 truncate">{p.tagline}</p>
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button 
+                            onClick={() => startEditProject(p)}
+                            type="button"
                             className="text-zinc-500 hover:text-white p-1"
                             title="수정"
                           >
@@ -674,6 +719,7 @@ export default function AdminPanel({
                           </button>
                           <button 
                             onClick={() => handleDeleteProject(p.id)}
+                            type="button"
                             className="text-zinc-650 hover:text-red-400 p-1"
                             title="삭제"
                           >

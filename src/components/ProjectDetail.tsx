@@ -270,7 +270,7 @@ export default function ProjectDetail({
             <h4 className="text-base font-sans font-semibold text-white tracking-tight">원격 보안 잠금 // 대표 핵심 기획안 보호</h4>
             <p className="text-zinc-400 text-[11px] mt-2 leading-relaxed">
               본 작품은 독자적인 발광 다이오드 구조 특허 공법 및 로고 디자인 자산 보호를 위해 시안 열람이 통제되어 있습니다. 
-              <strong> 채용담당자 전용 패스코드 (0610)</strong>를 기입하시면 원본 1400px 제한 Canvas 도면 시안의 락이 즉시 해제됩니다.
+              <strong> 채용담당자 전용 패스코드</strong>를 기입하시면 원본 1400px 제한 Canvas 도면 시안의 락이 즉시 해제됩니다.
             </p>
             
             <form onSubmit={handleUnlockSubmit} className="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
@@ -278,7 +278,7 @@ export default function ProjectDetail({
                 type="password"
                 value={passInput}
                 onChange={(e) => setPassInput(e.target.value)}
-                placeholder="채용인증 비밀번호 (0610)"
+                placeholder="채용인증 비밀번호"
                 className="bg-zinc-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#07569b]/80 w-full sm:max-w-[200px]"
               />
               <button 
@@ -291,7 +291,7 @@ export default function ProjectDetail({
 
             {passError && (
               <p className="text-red-400 text-[10px] mt-2.5 font-mono">
-                ❌ 불일치: 비밀번호가 올바르지 않습니다. (안내 비밀번호: 0610)
+                ❌ 불일치: 비밀번호가 올바르지 않습니다.
               </p>
             )}
 

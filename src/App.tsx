@@ -184,7 +184,7 @@ export default function App() {
             <a href="#workflow-section" className="hover:text-[#07569b] hover:opacity-100 transition-all">PROCESS</a>
             <a href="#skills-cert-section" className="hover:text-[#07569b] hover:opacity-100 transition-all">SKILLS</a>
             <a href="#contact-section" className="hover:text-[#07569b] hover:opacity-100 transition-all">CONTACT</a>
-            <a href="#admin-section" className="hover:text-red-500 text-red-600 border border-red-200 px-2.5 py-1 rounded bg-red-50 transition-all">ADMIN (0610)</a>
+            <a href="#admin-section" className="hover:text-red-500 text-red-600 border border-red-200 px-2.5 py-1 rounded bg-red-50 transition-all">ADMIN</a>
           </nav>
 
           {/* Recruiter Premium (VIP Mode Gateway Toggle) Removed according to request */}
