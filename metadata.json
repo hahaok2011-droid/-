@@ -1,0 +1,6 @@
+{
+  "name": "SIGN MAKER'S PLAYGROUND",
+  "description": "간판이 도시를 바꾸는 순간 - 하승완 공간 브랜딩 & 옥외 광고자 포트폴리오",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
