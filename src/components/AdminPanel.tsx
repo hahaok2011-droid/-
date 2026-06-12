@@ -188,7 +188,6 @@ export default function AdminPanel({
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [draggedProjectIndex, setDraggedProjectIndex] = useState<number | null>(null);
-  const [dragOverProjectIndex, setDragOverProjectIndex] = useState<number | null>(null);
 
   const [formId, setFormId] = useState("");
   const [formTitle, setFormTitle] = useState("");
@@ -264,37 +263,22 @@ export default function AdminPanel({
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
-    if (dragOverProjectIndex !== index) {
-      setDragOverProjectIndex(index);
-    }
-  };
+    if (draggedProjectIndex === null || draggedProjectIndex === index) return;
 
-  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
-    e.preventDefault();
-    const sourceIndexStr = e.dataTransfer.getData("text/plain");
-    const sourceIndex = sourceIndexStr !== "" ? parseInt(sourceIndexStr, 10) : draggedProjectIndex;
-
-    if (sourceIndex === null || sourceIndex === undefined || isNaN(sourceIndex) || sourceIndex === targetIndex) {
-      setDraggedProjectIndex(null);
-      setDragOverProjectIndex(null);
-      return;
-    }
-
+    // Instantly slide and reorder projects during drag hover for a smooth fluid effect
     const updated = [...projects];
-    const draggedItem = updated[sourceIndex];
+    const draggedItem = updated[draggedProjectIndex];
     
-    // Splice process: remove and insert
-    updated.splice(sourceIndex, 1);
-    updated.splice(targetIndex, 0, draggedItem);
+    updated.splice(draggedProjectIndex, 1);
+    updated.splice(index, 0, draggedItem);
 
+    // Propagate state right away
+    setDraggedProjectIndex(index);
     onUpdateProjects(updated);
-    setDraggedProjectIndex(null);
-    setDragOverProjectIndex(null);
   };
 
   const handleDragEnd = () => {
     setDraggedProjectIndex(null);
-    setDragOverProjectIndex(null);
   };
 
   const moveProjectUp = (index: number) => {
@@ -713,23 +697,19 @@ export default function AdminPanel({
                   {projects.map((p, idx) => {
                     const isActive = editingProject?.id === p.id;
                     const isBeingDragged = draggedProjectIndex === idx;
-                    const isHoveredTarget = dragOverProjectIndex === idx && draggedProjectIndex !== idx;
                     return (
                       <div 
                         key={p.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, idx)}
                         onDragOver={(e) => handleDragOver(e, idx)}
-                        onDrop={(e) => handleDrop(e, idx)}
                         onDragEnd={handleDragEnd}
                         className={`flex items-center justify-between p-3 rounded-xl border transition-all text-xs select-none ${
                           isBeingDragged 
-                            ? "opacity-20 border-red-500/70 bg-red-950/20" 
-                            : isHoveredTarget
-                              ? "border-amber-500 bg-amber-500/10 scale-[1.02]"
-                              : isActive && !isCreatingProject
-                                ? "bg-red-500/[0.04] border-red-500/40 text-red-400 font-bold" 
-                                : "bg-zinc-950/40 border-white/5 text-zinc-300 hover:bg-zinc-800/20"
+                            ? "opacity-40 border-amber-500/50 bg-amber-500/[0.04] scale-[0.98]" 
+                            : isActive && !isCreatingProject
+                              ? "bg-red-500/[0.04] border-red-500/40 text-red-400 font-bold" 
+                              : "bg-zinc-950/40 border-white/5 text-zinc-300 hover:bg-zinc-800/20"
                         }`}
                       >
                         <div className="flex items-center flex-1 min-w-0 gap-1.5">
