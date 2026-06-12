@@ -5,7 +5,7 @@
 
 import React, { useState } from "react";
 import { Project, ColorSwatch, WorkflowStep, ToolSkill, Certification } from "../types";
-import { Lock, ShieldCheck, Check, Trash2, Plus, Edit3, RefreshCw, Save, Layers, Award, Hammer, Briefcase, Upload, GripVertical } from "lucide-react";
+import { Lock, ShieldCheck, Check, Trash2, Plus, Edit3, RefreshCw, Save, Layers, Award, Hammer, Briefcase, Upload, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
 
 interface AdminPanelProps {
   projects: Project[];
@@ -188,6 +188,7 @@ export default function AdminPanel({
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [draggedProjectIndex, setDraggedProjectIndex] = useState<number | null>(null);
+  const [dragOverProjectIndex, setDragOverProjectIndex] = useState<number | null>(null);
 
   const [formId, setFormId] = useState("");
   const [formTitle, setFormTitle] = useState("");
@@ -258,23 +259,60 @@ export default function AdminPanel({
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedProjectIndex(index);
     e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index.toString());
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
-    if (draggedProjectIndex === null || draggedProjectIndex === index) return;
+    if (dragOverProjectIndex !== index) {
+      setDragOverProjectIndex(index);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    const sourceIndexStr = e.dataTransfer.getData("text/plain");
+    const sourceIndex = sourceIndexStr !== "" ? parseInt(sourceIndexStr, 10) : draggedProjectIndex;
+
+    if (sourceIndex === null || sourceIndex === undefined || isNaN(sourceIndex) || sourceIndex === targetIndex) {
+      setDraggedProjectIndex(null);
+      setDragOverProjectIndex(null);
+      return;
+    }
 
     const updated = [...projects];
-    const draggedItem = updated[draggedProjectIndex];
-    updated.splice(draggedProjectIndex, 1);
-    updated.splice(index, 0, draggedItem);
+    const draggedItem = updated[sourceIndex];
+    
+    // Splice process: remove and insert
+    updated.splice(sourceIndex, 1);
+    updated.splice(targetIndex, 0, draggedItem);
 
-    setDraggedProjectIndex(index);
     onUpdateProjects(updated);
+    setDraggedProjectIndex(null);
+    setDragOverProjectIndex(null);
   };
 
   const handleDragEnd = () => {
     setDraggedProjectIndex(null);
+    setDragOverProjectIndex(null);
+  };
+
+  const moveProjectUp = (index: number) => {
+    if (index === 0) return;
+    const updated = [...projects];
+    const temp = updated[index];
+    updated[index] = updated[index - 1];
+    updated[index - 1] = temp;
+    onUpdateProjects(updated);
+  };
+
+  const moveProjectDown = (index: number) => {
+    if (index === projects.length - 1) return;
+    const updated = [...projects];
+    const temp = updated[index];
+    updated[index] = updated[index + 1];
+    updated[index + 1] = temp;
+    onUpdateProjects(updated);
   };
 
   const startEditProject = (p: Project) => {
@@ -675,19 +713,23 @@ export default function AdminPanel({
                   {projects.map((p, idx) => {
                     const isActive = editingProject?.id === p.id;
                     const isBeingDragged = draggedProjectIndex === idx;
+                    const isHoveredTarget = dragOverProjectIndex === idx && draggedProjectIndex !== idx;
                     return (
                       <div 
                         key={p.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, idx)}
                         onDragOver={(e) => handleDragOver(e, idx)}
+                        onDrop={(e) => handleDrop(e, idx)}
                         onDragEnd={handleDragEnd}
                         className={`flex items-center justify-between p-3 rounded-xl border transition-all text-xs select-none ${
                           isBeingDragged 
                             ? "opacity-20 border-red-500/70 bg-red-950/20" 
-                            : isActive && !isCreatingProject
-                              ? "bg-red-500/[0.04] border-red-500/40 text-red-400 font-bold" 
-                              : "bg-zinc-950/40 border-white/5 text-zinc-300 hover:bg-zinc-800/20"
+                            : isHoveredTarget
+                              ? "border-amber-500 bg-amber-500/10 scale-[1.02]"
+                              : isActive && !isCreatingProject
+                                ? "bg-red-500/[0.04] border-red-500/40 text-red-400 font-bold" 
+                                : "bg-zinc-950/40 border-white/5 text-zinc-300 hover:bg-zinc-800/20"
                         }`}
                       >
                         <div className="flex items-center flex-1 min-w-0 gap-1.5">
@@ -709,10 +751,46 @@ export default function AdminPanel({
                           </button>
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
+                          {/* Up arrow */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              moveProjectUp(idx);
+                            }}
+                            className={`p-1 transition-colors ${
+                              idx === 0 
+                                ? "text-zinc-800 cursor-not-allowed opacity-30" 
+                                : "text-zinc-500 hover:text-amber-500"
+                            }`}
+                            disabled={idx === 0}
+                            title="위로 이동"
+                          >
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          </button>
+
+                          {/* Down arrow */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              moveProjectDown(idx);
+                            }}
+                            className={`p-1 transition-colors ${
+                              idx === projects.length - 1 
+                                ? "text-zinc-800 cursor-not-allowed opacity-30" 
+                                : "text-zinc-500 hover:text-amber-500"
+                            }`}
+                            disabled={idx === projects.length - 1}
+                            title="아래로 이동"
+                          >
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          </button>
+
                           <button 
                             onClick={() => startEditProject(p)}
                             type="button"
-                            className="text-zinc-500 hover:text-white p-1"
+                            className="text-zinc-500 hover:text-white p-1 ml-1"
                             title="수정"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
