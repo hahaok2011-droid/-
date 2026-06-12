@@ -12,6 +12,8 @@ import SkillsCert from "./components/SkillsCert";
 import AdminPanel from "./components/AdminPanel";
 import CopyProtection from "./components/CopyProtection";
 import Watermark from "./components/Watermark";
+// @ts-ignore
+import skylineBgImage from "./assets/images/seoul_skyline_sketch_bg_1781270387723.jpg";
 import { INITIAL_PROJECTS, WORKFLOW_STEPS, TOOL_SKILLS, CERTIFICATIONS } from "./data";
 import { Project, WorkflowStep, ToolSkill, Certification } from "./types";
 import { 
@@ -156,6 +158,24 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] bg-light-grid text-slate-800 font-sans leading-normal relative overflow-x-hidden select-none pt-16 md:pt-20">
       
+      {/* Dynamic Single centered Seoul Skyline Background - Fades out softly on all edges */}
+      <div className="absolute inset-x-0 top-0 h-[680px] md:h-[800px] overflow-hidden pointer-events-none select-none z-0">
+        <div 
+          className="w-full h-full opacity-[0.14] md:opacity-[0.19] mix-blend-multiply pointer-events-none transition-all duration-500"
+          style={{
+            maskImage: "radial-gradient(circle at 50% 40%, black 15%, rgba(0, 0, 0, 0.4) 45%, transparent 82%)",
+            WebkitMaskImage: "radial-gradient(circle at 50% 40%, black 15%, rgba(0, 0, 0, 0.4) 45%, transparent 82%)"
+          }}
+        >
+          <img 
+            src={skylineBgImage} 
+            alt="Seoul Skyline Centered Architectural Sketch Backing" 
+            className="w-full h-full object-cover object-center filter sepia-[60%] hue-rotate-[195deg] saturate-[300%] brightness-[0.8] contrast-[1.1]"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+      </div>
+
       {/* Visual Flare Element representing Sophisticated motif */}
       <div className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-[#07569b] rounded-full blur-[180px] opacity-[0.06] pointer-events-none z-0" />
       <div className="absolute top-[40%] -left-[20%] w-[500px] h-[500px] bg-[#07569b] rounded-full blur-[180px] opacity-[0.03] pointer-events-none z-0" />

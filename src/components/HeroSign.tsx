@@ -8,8 +8,20 @@ import { Sparkles, Compass, Lightbulb, MapPin, Eye } from "lucide-react";
 
 export default function HeroSign() {
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  const [translateY, setTranslateY] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement | null>(null);
+
+  // Precision tracking utilizing spring-like Lerp loops for responsive organic 3D movement
+  const currentRotRef = useRef({ x: 0, y: 0 });
+  const targetRotRef = useRef({ x: 0, y: 0 });
+  const currentYRef = useRef(0);
+  const targetYRef = useRef(0);
+  const isHoveredRef = useRef(false);
+
+  useEffect(() => {
+    isHoveredRef.current = isHovered;
+  }, [isHovered]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -18,16 +30,17 @@ export default function HeroSign() {
       const x = e.clientX - rect.left - rect.width / 2;
       const y = e.clientY - rect.top - rect.height / 2;
       
-      // Compute rotational tilt angles (maximum 18 degrees tilt)
-      const tiltX = -(y / (rect.height / 2)) * 18;
-      const tiltY = (x / (rect.width / 2)) * 18;
+      // Compute rotational tilt angles (maximum 16 degrees tilt matches tactile signage preview)
+      const tiltX = -(y / (rect.height / 2)) * 16;
+      const tiltY = (x / (rect.width / 2)) * 16;
       
-      setRotation({ x: tiltX, y: tiltY });
+      targetRotRef.current = { x: tiltX, y: tiltY };
+      targetYRef.current = -3; // Subtle vertical tension shift under cursor
     };
 
     const handleMouseLeave = () => {
-      // Smooth return to default neutral position
-      setRotation({ x: 0, y: 0 });
+      targetRotRef.current = { x: 0, y: 0 };
+      targetYRef.current = 0;
     };
 
     const card = cardRef.current;
@@ -36,16 +49,54 @@ export default function HeroSign() {
       card.addEventListener("mouseleave", handleMouseLeave);
     }
 
+    // 60FPS fluid cycle loop
+    let animationFrameId: number;
+    const startTime = Date.now();
+
+    const updateLoop = () => {
+      const elapsed = (Date.now() - startTime) / 1000;
+
+      if (!isHoveredRef.current) {
+        // [AUTO FLOATING SWAY MODE]: When user is NOT hovering, gently tilt and hover to indicate clickability
+        // Waves have non-harmonic frequencies for an organic, non-robotic feel
+        targetRotRef.current = {
+          x: Math.sin(elapsed * 1.4) * 2.0,
+          y: Math.cos(elapsed * 1.7) * 2.5
+        };
+        // Gentle spatial levitation (fluctuates about 5 pixels)
+        targetYRef.current = Math.sin(elapsed * 1.1) * 6.5;
+      } else {
+        // [TACTILE HOVER ACTIVE]: Apply minor dynamic micro-sway layered over physical cursor tracking
+        const waveX = Math.sin(elapsed * 3.5) * 0.3;
+        const waveY = Math.cos(elapsed * 3.5) * 0.3;
+        targetRotRef.current.x += waveX;
+        targetRotRef.current.y += waveY;
+      }
+
+      // Smooth Linear Interpolation (0.08 damping leads to luxurious premium elasticity)
+      currentRotRef.current.x += (targetRotRef.current.x - currentRotRef.current.x) * 0.08;
+      currentRotRef.current.y += (targetRotRef.current.y - currentRotRef.current.y) * 0.08;
+      currentYRef.current += (targetYRef.current - currentYRef.current) * 0.08;
+
+      setRotation({ x: currentRotRef.current.x, y: currentRotRef.current.y });
+      setTranslateY(currentYRef.current);
+
+      animationFrameId = requestAnimationFrame(updateLoop);
+    };
+
+    animationFrameId = requestAnimationFrame(updateLoop);
+
     return () => {
       if (card) {
         card.removeEventListener("mousemove", handleMouseMove);
         card.removeEventListener("mouseleave", handleMouseLeave);
       }
+      cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
   return (
-    <div className="relative w-full max-w-7xl mx-auto px-6 pt-16 md:pt-24 pb-12 flex flex-col items-center justify-center overflow-hidden">
+    <div className="relative w-full max-w-7xl mx-auto px-6 pt-16 md:pt-24 pb-12 flex flex-col items-center justify-center overflow-visible">
       
       {/* Background radial glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] md:w-[600px] h-[250px] md:h-[400px] bg-[#07569b]/[0.08] blur-[120px] rounded-full pointer-events-none select-none z-0" />
@@ -55,13 +106,14 @@ export default function HeroSign() {
         ref={cardRef}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="relative z-10 w-full max-w-[500px] md:max-w-[700px] bg-white border border-[#07569b]/30 rounded-3xl p-6 md:p-12 transition-all duration-300 ease-out flex flex-col items-center justify-center select-none cursor-grab shadow-[0_20px_50px_rgba(7,86,155,0.06)]"
+        className="relative z-10 w-full max-w-[500px] md:max-w-[700px] bg-white border border-[#07569b]/35 rounded-3xl p-6 md:p-12 ease-out flex flex-col items-center justify-center select-none cursor-grab shadow-[0_22px_54px_rgba(7,86,155,0.06)] transform-gpu active:cursor-grabbing"
         style={{
-          transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(${isHovered ? 1.02 : 1})`,
+          transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) translateY(${translateY}px) scale(${isHovered ? 1.025 : 1})`,
           transformStyle: "preserve-3d",
+          transition: "transform 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 350ms ease-out",
           boxShadow: isHovered 
-            ? "0 30px 60px rgba(7, 86, 155, 0.12), 0 0 30px 1px rgba(7, 86, 155, 0.2)" 
-            : "0 20px 50px rgba(7, 86, 155, 0.06)"
+            ? "0 35px 70px rgba(7, 86, 155, 0.14), 0 0 35px 2px rgba(7, 86, 155, 0.22)" 
+            : "0 22px 54px rgba(7, 86, 155, 0.06)"
         }}
       >
         {/* Absolute metal studs (4 corners of industrial sign boards) */}
@@ -142,9 +194,7 @@ export default function HeroSign() {
           하승완 <span className="text-[#07569b] font-mono font-bold text-xs uppercase ml-1.5 border-l border-slate-200 pl-2">Outdoor Advertising Designer</span>
         </h2>
         <p className="text-slate-600 text-xs md:text-sm mt-1.5 leading-relaxed font-sans font-medium">
-          단순 공예 기술자를 마감하고, 도시 상업 경관의 맥락을 읽는 
-          <strong className="text-slate-900"> '공간 브랜딩 디자이너'</strong>로 활동합니다. 빌딩 외벽의 음영 and 관측 거리 50m 시인성을 
-          정량 지표화하여, 비즈니스를 성공시키는 사인을 제도합니다.
+          단순 디자이너를 넘어, 공간을 이해하고 도시와의 조화를 이루는 공간을 브랜딩합니다. 가시거리에 대한 시인성을 지표화해서 비지니스를 성공시키는 사인을 추구합니다.
         </p>
       </div>
 
