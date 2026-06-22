@@ -13,7 +13,7 @@ import AdminPanel from "./components/AdminPanel";
 import CopyProtection from "./components/CopyProtection";
 import Watermark from "./components/Watermark";
 // @ts-ignore
-import skylineBgImage from "./assets/images/seoul_skyline_sketch_bg_1781270387723.jpg";
+import skylineBgImage from "./assets/images/skyline_vector_outline_1782087169728.jpg";
 import { INITIAL_PROJECTS, WORKFLOW_STEPS, TOOL_SKILLS, CERTIFICATIONS } from "./data";
 import { Project, WorkflowStep, ToolSkill, Certification } from "./types";
 import { 
@@ -158,23 +158,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] bg-light-grid text-slate-800 font-sans leading-normal relative overflow-x-hidden select-none pt-16 md:pt-20">
       
-      {/* Dynamic Single centered Seoul Skyline Background - Fades out softly on all edges */}
-      <div className="absolute inset-x-0 top-0 h-[680px] md:h-[800px] overflow-hidden pointer-events-none select-none z-0">
-        <div 
-          className="w-full h-full opacity-[0.14] md:opacity-[0.19] mix-blend-multiply pointer-events-none transition-all duration-500"
-          style={{
-            maskImage: "radial-gradient(circle at 50% 40%, black 15%, rgba(0, 0, 0, 0.4) 45%, transparent 82%)",
-            WebkitMaskImage: "radial-gradient(circle at 50% 40%, black 15%, rgba(0, 0, 0, 0.4) 45%, transparent 82%)"
-          }}
-        >
-          <img 
-            src={skylineBgImage} 
-            alt="Seoul Skyline Centered Architectural Sketch Backing" 
-            className="w-full h-full object-cover object-center filter sepia-[60%] hue-rotate-[195deg] saturate-[300%] brightness-[0.8] contrast-[1.1]"
-            referrerPolicy="no-referrer"
-          />
-        </div>
-      </div>
+      {/* Background skylines are now nested inside the Hero section below for pixel-perfect vertical alignment */}
 
       {/* Visual Flare Element representing Sophisticated motif */}
       <div className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-[#07569b] rounded-full blur-[180px] opacity-[0.06] pointer-events-none z-0" />
@@ -220,6 +204,56 @@ export default function App() {
 
       {/* HERO SCENE SECTION */}
       <section className="relative z-10 w-full min-h-[80vh] flex items-center justify-center my-6 md:my-10">
+        {/* SVG Filter to map black `#000000` to Point Blue `#07569b` and keep white `#ffffff` exactly as `#ffffff` */}
+        <svg className="absolute w-0 h-0 pointer-events-none" aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0 }}>
+          <defs>
+            <filter id="blue-skyline-tint" colorInterpolationFilters="sRGB">
+              <feComponentTransfer>
+                <feFuncR type="linear" slope="0.973" intercept="0.027" />
+                <feFuncG type="linear" slope="0.663" intercept="0.337" />
+                <feFuncB type="linear" slope="0.392" intercept="0.608" />
+              </feComponentTransfer>
+            </filter>
+          </defs>
+        </svg>
+
+        {/* Dynamic Mirror-spread Seoul Skyline Background - Aligned precisely with the baseline of the moving box/card */}
+        <div className="absolute inset-x-0 bottom-[12%] md:bottom-[15%] h-[300px] md:h-[450px] overflow-hidden pointer-events-none select-none z-0">
+          {/* Left Side Skyline Background */}
+          <div 
+            className="absolute left-[1vw] md:left-[3vw] bottom-0 w-[45%] max-w-[600px] h-full opacity-[0.25] md:opacity-[0.32] pointer-events-none transition-all duration-500 mix-blend-multiply"
+            style={{
+              maskImage: "radial-gradient(ellipse at 20% 85%, black 15%, rgba(0,0,0,0.4) 55%, transparent 90%)",
+              WebkitMaskImage: "radial-gradient(ellipse at 20% 85%, black 15%, rgba(0,0,0,0.4) 55%, transparent 90%)"
+            }}
+          >
+            <img 
+              src={skylineBgImage} 
+              alt="Seoul Skyline Left Architectural Backing" 
+              className="w-full h-full object-contain object-left-bottom"
+              style={{ filter: "url(#blue-skyline-tint) contrast(1.25) brightness(1.10)" }}
+              referrerPolicy="no-referrer"
+            />
+          </div>
+
+          {/* Right Side Skyline Background - Horizontally Mirrored/Reversed */}
+          <div 
+            className="absolute right-[1vw] md:right-[3vw] bottom-0 w-[45%] max-w-[600px] h-full opacity-[0.25] md:opacity-[0.32] pointer-events-none transition-all duration-500 scale-x-[-1] mix-blend-multiply"
+            style={{
+              maskImage: "radial-gradient(ellipse at 20% 85%, black 15%, rgba(0,0,0,0.4) 55%, transparent 90%)",
+              WebkitMaskImage: "radial-gradient(ellipse at 20% 85%, black 15%, rgba(0,0,0,0.4) 55%, transparent 90%)"
+            }}
+          >
+            <img 
+              src={skylineBgImage} 
+              alt="Seoul Skyline Right Architectural Backing" 
+              className="w-full h-full object-contain object-left-bottom"
+              style={{ filter: "url(#blue-skyline-tint) contrast(1.25) brightness(1.10)" }}
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        </div>
+
         <HeroSign />
       </section>
 
