@@ -202,6 +202,9 @@ export default function AdminPanel({
   const [formLayoutDesc, setFormLayoutDesc] = useState("");
   const [formImgBefore, setFormImgBefore] = useState("");
   const [formImgAfter, setFormImgAfter] = useState("");
+  const [formImgBeforeLabel, setFormImgBeforeLabel] = useState("");
+  const [formImgAfterLabel, setFormImgAfterLabel] = useState("");
+  const [formAdditionalImages, setFormAdditionalImages] = useState<{ id: string; url: string; label: string }[]>([]);
   const [formResult, setFormResult] = useState("");
   const [formIsPremium, setFormIsPremium] = useState(false);
   const [formSplitViewer, setFormSplitViewer] = useState(false);
@@ -315,6 +318,9 @@ export default function AdminPanel({
     setFormLayoutDesc(p.layoutDesc);
     setFormImgBefore(p.imgBefore);
     setFormImgAfter(p.imgAfter);
+    setFormImgBeforeLabel(p.imgBeforeLabel || "시공 전 (BEFORE)");
+    setFormImgAfterLabel(p.imgAfterLabel || "성공 시공 (AFTER)");
+    setFormAdditionalImages(p.additionalImages || []);
     setFormResult(p.result);
     setFormIsPremium(p.isPremium);
     setFormSplitViewer(p.splitViewerEnabled);
@@ -338,6 +344,9 @@ export default function AdminPanel({
     setFormLayoutDesc("");
     setFormImgBefore("https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&q=80");
     setFormImgAfter("https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80");
+    setFormImgBeforeLabel("시공 전 (BEFORE)");
+    setFormImgAfterLabel("성공 시공 (AFTER)");
+    setFormAdditionalImages([]);
     setFormResult("");
     setFormIsPremium(false);
     setFormSplitViewer(false);
@@ -382,6 +391,9 @@ export default function AdminPanel({
       layoutDesc: formLayoutDesc || "보행 인지선 중심 1:1.6 비례 레이아웃",
       imgBefore: formImgBefore,
       imgAfter: formImgAfter,
+      imgBeforeLabel: formImgBeforeLabel,
+      imgAfterLabel: formImgAfterLabel,
+      additionalImages: formAdditionalImages,
       result: formResult || "만족도 향상 완료.",
       isPremium: formIsPremium,
       splitViewerEnabled: formSplitViewer,
@@ -812,33 +824,33 @@ export default function AdminPanel({
                         </button>
                       </div>
 
-                      {/* ID & Category */}
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">프로젝트 코드 ID (영문/유니크)</label>
+                      {/* Category Input (Freeform) - ID is now auto-generated & hidden for better UX */}
+                      <div className="sm:col-span-2 flex flex-col gap-1.5">
+                        <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">간판 구분 카탈로그 (자유 지정)</label>
                         <input 
                           type="text"
-                          value={formId}
-                          onChange={(e) => setFormId(e.target.value)}
-                          disabled={!isCreatingProject}
-                          className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-300 placeholder-zinc-700 disabled:opacity-50"
+                          value={formCategory}
+                          onChange={(e) => setFormCategory(e.target.value)}
+                          className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-200 focus:outline-none"
+                          placeholder="예: 태권도, 카페, 학원, 미용실, 식당 등 직접 입력"
                           required
                         />
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">간판 구분 카탈로그</label>
-                        <select 
-                          value={formCategory}
-                          onChange={(e) => setFormCategory(e.target.value as any)}
-                          className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-350 focus:outline-none"
-                        >
-                          <option value="태권도">태권도</option>
-                          <option value="병원">병원</option>
-                          <option value="카페">카페</option>
-                          <option value="학원">학원</option>
-                          <option value="프랜차이즈">프랜차이즈</option>
-                          <option value="기타">기타</option>
-                        </select>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {Array.from(new Set(projects.map(p => p.category).concat(["태권도", "병원", "카페", "학원", "프랜차이즈", "기타"]))).filter(Boolean).map(cat => (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => setFormCategory(cat)}
+                              className={`text-[9px] font-sans px-2.5 py-0.5 rounded-full border transition-all cursor-pointer ${
+                                formCategory === cat
+                                  ? "bg-blue-600/20 border-blue-500 text-blue-400 font-semibold"
+                                  : "bg-zinc-950 border-white/5 text-zinc-400 hover:text-zinc-200 hover:border-white/10"
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
                       </div>
 
                       {/* Title & Tagline */}
@@ -937,25 +949,125 @@ export default function AdminPanel({
                       </div>
 
                       {/* Image URLs */}
-                      <ImageUploadField 
-                        label="시공전 Before 사진 등록"
-                        value={formImgBefore}
-                        onChange={setFormImgBefore}
-                        onFileLoaded={setFormImgBefore}
-                        id="file-before"
-                        accentColorClass="text-red-500 font-bold"
-                        borderColorClass="border-red-500/50"
-                      />
+                      <div className="flex flex-col gap-1.5 w-full">
+                        <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">시공전 슬라이드 타이틀 (Label)</label>
+                        <input 
+                          type="text"
+                          value={formImgBeforeLabel}
+                          onChange={(e) => setFormImgBeforeLabel(e.target.value)}
+                          className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-200"
+                          placeholder="시공 전 (BEFORE)"
+                        />
+                        <ImageUploadField 
+                          label="시공전 Before 사진 등록"
+                          value={formImgBefore}
+                          onChange={setFormImgBefore}
+                          onFileLoaded={setFormImgBefore}
+                          id="file-before"
+                          accentColorClass="text-red-500 font-bold"
+                          borderColorClass="border-red-500/50"
+                        />
+                      </div>
 
-                      <ImageUploadField 
-                        label="시공후 After 사진 등록"
-                        value={formImgAfter}
-                        onChange={setFormImgAfter}
-                        onFileLoaded={setFormImgAfter}
-                        id="file-after"
-                        accentColorClass="text-emerald-500 font-bold"
-                        borderColorClass="border-emerald-500/50"
-                      />
+                      <div className="flex flex-col gap-1.5 w-full">
+                        <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">시공후 슬라이드 타이틀 (Label)</label>
+                        <input 
+                          type="text"
+                          value={formImgAfterLabel}
+                          onChange={(e) => setFormImgAfterLabel(e.target.value)}
+                          className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-200"
+                          placeholder="성공 시공 (AFTER)"
+                        />
+                        <ImageUploadField 
+                          label="시공후 After 사진 등록"
+                          value={formImgAfter}
+                          onChange={setFormImgAfter}
+                          onFileLoaded={setFormImgAfter}
+                          id="file-after"
+                          accentColorClass="text-emerald-500 font-bold"
+                          borderColorClass="border-emerald-500/50"
+                        />
+                      </div>
+
+                      {/* Additional Images Section */}
+                      <div className="sm:col-span-2 border-t border-white/5 pt-4 mt-2 flex flex-col gap-3">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-zinc-900/60 p-3 rounded-xl border border-white/5 gap-2">
+                          <div>
+                            <h5 className="text-xs font-bold text-amber-500 font-sans flex items-center gap-1">
+                              📸 추가 전경 사진 정보 ({formAdditionalImages.length}개 추가됨)
+                            </h5>
+                            <p className="text-[10px] text-zinc-500 mt-0.5">상세 보기 화면에서 추가 사진 갤러리로 출력됩니다.</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormAdditionalImages([
+                                ...formAdditionalImages,
+                                { id: `add-${Date.now()}-${Math.random()}`, url: "", label: `추가 이미지 ${formAdditionalImages.length + 1}` }
+                              ]);
+                            }}
+                            className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer self-start sm:self-center"
+                          >
+                            <Plus className="w-3.5 h-3.5" /> 추가 이미지 슬롯 삽입
+                          </button>
+                        </div>
+
+                        {formAdditionalImages.length > 0 && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto p-2 bg-zinc-950/40 rounded-xl border border-white/5">
+                            {formAdditionalImages.map((img, index) => (
+                              <div key={img.id} className="relative w-full bg-zinc-900 border border-white/5 p-3 rounded-xl flex flex-col gap-2 shadow-md">
+                                <div className="flex justify-between items-center border-b border-white/5 pb-1.5 mb-1">
+                                  <span className="text-[10px] font-mono font-bold text-blue-400"># {index + 1}번째 이미지</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setFormAdditionalImages(formAdditionalImages.filter(item => item.id !== img.id));
+                                    }}
+                                    className="text-red-400 hover:text-red-300 p-1"
+                                    title="슬롯 제거"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                  <label className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">이미지 타이틀 / 설명</label>
+                                  <input
+                                    type="text"
+                                    value={img.label}
+                                    onChange={(e) => {
+                                      const updated = [...formAdditionalImages];
+                                      updated[index].label = e.target.value;
+                                      setFormAdditionalImages(updated);
+                                    }}
+                                    className="bg-zinc-950 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-zinc-200"
+                                    placeholder="예: 실내 정면 뷰"
+                                    required
+                                  />
+                                </div>
+
+                                <ImageUploadField
+                                  label="사진 등록"
+                                  value={img.url}
+                                  onChange={(val) => {
+                                    const updated = [...formAdditionalImages];
+                                    updated[index].url = val;
+                                    setFormAdditionalImages(updated);
+                                  }}
+                                  onFileLoaded={(base64) => {
+                                    const updated = [...formAdditionalImages];
+                                    updated[index].url = base64;
+                                    setFormAdditionalImages(updated);
+                                  }}
+                                  id={`file-add-${img.id}`}
+                                  accentColorClass="text-zinc-500"
+                                  borderColorClass="border-zinc-800"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
                       {/* Result */}
                       <div className="sm:col-span-2 flex flex-col gap-1">

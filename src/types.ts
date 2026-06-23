@@ -11,7 +11,7 @@ export interface ColorSwatch {
 export interface Project {
   id: string;
   title: string;
-  category: "태권도" | "병원" | "카페" | "학원" | "프랜차이즈" | "기타";
+  category: string;
   tagline: string;
   problem: string;
   strategy: string[];
@@ -23,6 +23,9 @@ export interface Project {
   layoutDesc: string;
   imgBefore: string;
   imgAfter: string;
+  imgBeforeLabel?: string; // custom title for before image
+  imgAfterLabel?: string;  // custom title for after image
+  additionalImages?: { id: string; url: string; label: string }[];
   result: string;
   isPremium: boolean; // Locked behind premium access
   splitViewerEnabled: boolean; // Fragment partition viewer enabled for copyright protect

@@ -520,7 +520,7 @@ export default function ProjectDetail({
                         referrerPolicy="no-referrer"
                       />
                       <div className="absolute bottom-3 right-3 z-10 bg-[#07569b] text-white font-extrabold font-mono text-[8px] px-2 py-0.5 rounded uppercase tracking-wider shadow">
-                        성공 시공 (AFTER)
+                        {project.imgAfterLabel || "성공 시공 (AFTER)"}
                       </div>
                     </div>
 
@@ -537,7 +537,7 @@ export default function ProjectDetail({
                         referrerPolicy="no-referrer"
                       />
                       <div className="absolute bottom-3 left-3 z-20 bg-red-600 text-white font-extrabold font-mono text-[8px] px-2 py-0.5 rounded uppercase tracking-wider shadow">
-                        시공 전 (BEFORE)
+                        {project.imgBeforeLabel || "시공 전 (BEFORE)"}
                       </div>
                     </div>
 
@@ -567,6 +567,42 @@ export default function ProjectDetail({
               <p className="text-[9px] text-[#07569b]/70 font-mono text-center tracking-tight bg-zinc-950 p-2.5 rounded-xl border border-white/5 uppercase">
                 ⚙️ TIP: 작품 구역에 마우스를 올리면 3D 자이로스코프 패럴랙스가 가동되어 도면 경관이 입체적으로 조절됩니다.
               </p>
+
+              {/* Dynamic Additional Images Gallery */}
+              {project.additionalImages && project.additionalImages.length > 0 && (
+                <div className="flex flex-col gap-2 border-t border-white/5 pt-4 mt-2">
+                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-semibold flex justify-between">
+                    <span>🖼️ 본 현장 추가 상세 전경 ({project.additionalImages.length}개 추가됨)</span>
+                    <span className="text-[#07569b] font-bold">ADDITIONAL VIEWS</span>
+                  </span>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {project.additionalImages.map((img) => (
+                      <div 
+                        key={img.id} 
+                        className="relative rounded-xl overflow-hidden border border-white/10 bg-black/60 group shadow-md select-none pointer-events-none"
+                        title={img.label}
+                      >
+                        {/* Overlay label */}
+                        <div className="absolute bottom-1.5 left-1.5 z-20 bg-zinc-900/90 border border-white/10 text-white font-semibold font-sans text-[7.5px] px-1.5 py-0.5 rounded tracking-wide max-w-[90%] truncate">
+                          {img.label}
+                        </div>
+                        {/* Security stamp */}
+                        <div className="absolute inset-0 z-10 pointer-events-none select-none opacity-[0.015] flex items-center justify-center">
+                          <span className="text-[6px] font-mono font-bold tracking-[0.1em] rotate-12">SECURED DESIGN PREVIEW</span>
+                        </div>
+                        {/* Actual Image */}
+                        <img 
+                          src={img.url} 
+                          alt={img.label}
+                          className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             </div>
 
