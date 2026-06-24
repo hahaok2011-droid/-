@@ -37,7 +37,7 @@ export default function App() {
   // Initialize and check LocalStorage
   useEffect(() => {
     // 1. Projects
-    const cachedProjects = localStorage.getItem("hsw_projects");
+    const cachedProjects = localStorage.getItem("hsw_projects_v17");
     if (cachedProjects) {
       try {
         setProjects(JSON.parse(cachedProjects));
@@ -46,7 +46,7 @@ export default function App() {
       }
     } else {
       setProjects(INITIAL_PROJECTS);
-      localStorage.setItem("hsw_projects", JSON.stringify(INITIAL_PROJECTS));
+      localStorage.setItem("hsw_projects_v17", JSON.stringify(INITIAL_PROJECTS));
     }
 
     // 2. Workflows
@@ -91,7 +91,7 @@ export default function App() {
 
   const handleUpdateProjects = (updated: Project[]) => {
     setProjects(updated);
-    localStorage.setItem("hsw_projects", JSON.stringify(updated));
+    localStorage.setItem("hsw_projects_v17", JSON.stringify(updated));
     // If selected project was updated or deleted
     if (selectedProject) {
       const stillExists = updated.find(p => p.id === selectedProject.id);
@@ -119,7 +119,7 @@ export default function App() {
   };
 
   const handleResetToDefault = () => {
-    localStorage.removeItem("hsw_projects");
+    localStorage.removeItem("hsw_projects_v17");
     localStorage.removeItem("hsw_workflow");
     localStorage.removeItem("hsw_skills");
     localStorage.removeItem("hsw_certs");

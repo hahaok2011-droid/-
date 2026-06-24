@@ -6,9 +6,10 @@
 import React, { useState, useEffect } from "react";
 import { Project } from "../types";
 import { 
-  X, AlertCircle, Lightbulb, Lock, ArrowRight, ShieldCheck, Sparkles
+  X, AlertCircle, Lightbulb, Lock, ArrowRight, ShieldCheck, Sparkles, Play, Pause, ChevronLeft, ChevronRight, Info, Eye
 } from "lucide-react";
 import SplitCanvasViewer from "./SplitCanvasViewer";
+import { motion, AnimatePresence } from "motion/react";
 
 interface ProjectDetailProps {
   project: Project;
@@ -31,6 +32,39 @@ export default function ProjectDetail({
   // Anti-capture security status
   const [blackoutActive, setBlackoutActive] = useState(false);
 
+  // New Requested Features: Auto Slideshow (2s) & Floating Info HUD Toggle
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [showInfoPanel, setShowInfoPanel] = useState(true);
+
+  // Collect all available images for this project into a unified list
+  const rawImages = [
+    project.imgAfter ? { url: project.imgAfter, label: project.imgAfterLabel || "대표 이미지 1" } : null,
+    project.imgBefore ? { url: project.imgBefore, label: project.imgBeforeLabel || "대표 이미지 2" } : null,
+    ...(project.additionalImages || []).map((img, idx) => ({ url: img.url, label: img.label || `상세 이미지 ${idx + 1}` }))
+  ].filter((img): img is { url: string; label: string } => !!img && !!img.url);
+
+  // Remove any duplicate image URLs
+  const allImages = rawImages.filter((img, index, self) =>
+    index === self.findIndex((t) => t.url === img.url)
+  );
+
+  const activeImage = allImages[activeImageIndex] || allImages[0] || { url: project.imgAfter, label: "대표 이미지 1" };
+  const isLocked = project.isPremium && !isUnlocked;
+
+  // Auto Slideshow Effect (Silky Smooth Museum Crossfade)
+  useEffect(() => {
+    if (!isPlaying || allImages.length <= 1 || isLocked) return;
+    const interval = setInterval(() => {
+      setActiveImageIndex((prev) => (prev + 1) % allImages.length);
+    }, 4200);
+    return () => clearInterval(interval);
+  }, [isPlaying, allImages.length, isLocked]);
+
+  const handleThumbnailClick = (index: number) => {
+    setActiveImageIndex(index);
+    setIsPlaying(false); // Stop slideshow when user manually selects thumbnail
+  };
+
   // Update real-time ticking UTC timestamp to embed persistent security stamps
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -51,22 +85,27 @@ export default function ProjectDetail({
     const handleKeyDown = (e: KeyboardEvent) => {
       const isCmdOrCtrl = e.metaKey || e.ctrlKey;
       
-      // ESC button close logic requested by user
+      // ESC button close logic
       if (e.key === "Escape" || e.key === "Esc") {
         onClose();
         return;
+      }
+
+      // Spacebar toggle slideshow
+      if (e.key === " " && !isLocked) {
+        setIsPlaying((prev) => !prev);
       }
 
       // Blackout when typical snapshot/export hotkeys are triggered
       if (
         e.key === "PrintScreen" || 
         e.key === "Snapshot" ||
-        (isCmdOrCtrl && e.key === "p") || // Web page printable
-        (isCmdOrCtrl && e.key === "s") || // File save
-        (isCmdOrCtrl && e.key === "c") || // Copy blocking
-        e.key === "F12" || // Inspector
-        (isCmdOrCtrl && e.shiftKey && e.key === "s") || // Win+Shift+S snipping trigger hint
-        (isCmdOrCtrl && e.shiftKey && e.key === "4")    // Mac command shift 4 hint
+        (isCmdOrCtrl && e.key === "p") ||
+        (isCmdOrCtrl && e.key === "s") ||
+        (isCmdOrCtrl && e.key === "c") ||
+        e.key === "F12" ||
+        (isCmdOrCtrl && e.shiftKey && e.key === "s") ||
+        (isCmdOrCtrl && e.shiftKey && e.key === "4")
       ) {
         setBlackoutActive(true);
         const warningToast = document.getElementById("hswup-warning-toast");
@@ -92,7 +131,7 @@ export default function ProjectDetail({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [onClose]);
+  }, [onClose, isLocked]);
 
   const handleUnlockSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,305 +144,275 @@ export default function ProjectDetail({
     }
   };
 
-  // Collect all available images for this project into a unified list
-  const allImages = [
-    project.imgAfter ? { url: project.imgAfter, label: project.imgAfterLabel || "대표 이미지 1" } : null,
-    project.imgBefore ? { url: project.imgBefore, label: project.imgBeforeLabel || "대표 이미지 2" } : null,
-    ...(project.additionalImages || []).map((img, idx) => ({ url: img.url, label: img.label || `상세 이미지 ${idx + 1}` }))
-  ].filter((img): img is { url: string; label: string } => !!img && !!img.url);
-
-  const activeImage = allImages[activeImageIndex] || allImages[0] || { url: project.imgAfter, label: "대표 이미지 1" };
-  const isLocked = project.isPremium && !isUnlocked;
-
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/98 backdrop-blur-2xl overflow-y-auto lg:overflow-hidden flex justify-center items-center p-2 sm:p-4 md:p-6 select-none"
-      onContextMenu={(e) => e.preventDefault()} // Block right-click context menu
+      className="fixed inset-0 z-50 bg-black/98 backdrop-blur-3xl overflow-hidden flex flex-col select-none"
+      onContextMenu={(e) => e.preventDefault()}
     >
-      {/* Dynamic Keyframes Styles */}
-      <style>{`
-        @keyframes detailBloomIn {
-          0% {
-            opacity: 0;
-            transform: scale(0.96) translateY(15px);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
-        }
-        @keyframes floatWatermark {
-          0% { background-position: 0px 0px; }
-          100% { background-position: 60px 60px; }
-        }
-        .animate-bloom-in {
-          animation: detailBloomIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .moving-watermark-overlay {
-          background-size: 40px 40px;
-          background-image: repeating-linear-gradient(
-            45deg,
-            rgba(7, 86, 155, 0.035),
-            rgba(7, 86, 155, 0.035) 1px,
-            transparent 1px,
-            transparent 14px
-          );
-          animation: floatWatermark 12s linear infinite;
-        }
-      `}</style>
-
-      {/* Persistent safety watermark backdrop behind modal panel */}
-      <div className="absolute inset-0 bg-transparent moving-watermark-overlay pointer-events-none z-0 opacity-40" />
-
       {/* Floating Active Warning message toast */}
       <div 
         id="hswup-warning-toast"
-        className="fixed top-4 left-1/2 -translate-x-1/2 bg-red-600 border border-red-500 text-white font-mono text-center tracking-wider text-xs font-bold py-3 px-6 rounded-xl shadow-2xl z-55 pointer-events-none opacity-0 transition-opacity duration-300 uppercase"
+        className="fixed top-16 left-1/2 -translate-x-1/2 bg-red-600 border border-red-500 text-white font-mono text-center tracking-wider text-xs font-bold py-3 px-6 rounded-xl shadow-2xl z-55 pointer-events-none opacity-0 transition-opacity duration-300 uppercase"
       >
         ⚠️ SECURITY SHIELD ENGAGED — SCREEN CAPTURE & COPY BLOCKED OFF
       </div>
 
-      {/* Modal Main Shell Container: Max-width 1600px, responsive flex workbench */}
-      <div className="relative w-full max-w-[1580px] bg-zinc-950 border border-white/10 rounded-2xl p-4 md:p-6 shadow-[0_0_100px_rgba(0,0,0,0.95)] z-10 animate-bloom-in flex flex-col max-h-[calc(100vh-1.5rem)] md:max-h-[calc(100vh-3rem)] min-h-[500px]">
+      {/* TOP FLOATING CONTROL HUD BAR (Sleek Glass Workbench) */}
+      <header className="w-full shrink-0 bg-zinc-950/90 border-b border-white/10 px-4 py-3 backdrop-blur-xl z-40 flex flex-col md:flex-row items-center justify-between gap-3 shadow-2xl">
         
-        {/* Anti-screenshot Watermark background text */}
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center select-none overflow-hidden opacity-[0.012]">
-          <div className="text-white text-[16px] font-mono font-black uppercase tracking-[0.4em] rotate-12 whitespace-nowrap leading-loose">
-            CONFIDENTIAL DIGITAL PORTFOLIO PORTAL • HA SEUNG WAN SIGNMASTER • LIVE TRACKING ACTIVE • {currentTime} • CONFIDENTIAL DIGITAL PORTFOLIO PORTAL • HA SEUNG WAN SIGNMASTER
-          </div>
+        {/* Title & Badge */}
+        <div className="flex items-center gap-2.5 min-w-0 mr-auto md:mr-0">
+          <span className="bg-[#07569b]/20 border border-[#07569b]/50 text-blue-300 font-mono text-[10px] font-bold px-3 py-1 rounded-full shrink-0 uppercase shadow-sm">
+            {project.category}
+          </span>
+          <h3 className="text-sm md:text-lg font-sans font-extrabold text-white truncate tracking-tight">
+            {project.title}
+          </h3>
+          {project.isPremium && (
+            <span className="bg-blue-950/60 border border-[#07569b]/30 text-blue-300 text-[8.5px] font-mono px-2 py-0.5 rounded-md uppercase hidden sm:flex items-center gap-1">
+              <Lock className="w-2.5 h-2.5 text-[#07569b]" /> Protected
+            </span>
+          )}
         </div>
 
-        {/* Modal Top Header Section (Compact) */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/10 pb-4 mb-4 shrink-0 relative z-10">
-          <div>
-            <div className="flex flex-wrap items-center gap-2 mb-1 font-mono text-[9px] font-bold">
-              <span className="bg-[#07569b]/10 border border-[#07569b]/30 text-[#07569b] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                {project.category} CASE STUDY
-              </span>
-              {project.isPremium && (
-                <span className="bg-blue-950/40 border border-[#07569b]/20 text-blue-300 px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                  <Lock className="w-2.5 h-2.5 text-[#07569b]" /> Premium Security
-                </span>
-              )}
-              <span className="bg-red-950/40 border border-red-500/20 text-red-400 px-2 py-0.5 rounded flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-red-400 animate-pulse" /> 캡처 감지 차단막 연동
-              </span>
-            </div>
-            
-            <h3 className="text-lg md:text-2xl font-sans font-extrabold text-white tracking-tight flex items-center gap-2">
-              {project.title}
-              <span className="text-xs font-normal text-zinc-400 hidden lg:inline font-sans truncate max-w-xl">
-                | {project.tagline}
-              </span>
-            </h3>
-          </div>
-          
-          <button 
-            onClick={onClose}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-zinc-900 hover:bg-red-950/40 hover:border-red-500/30 border border-white/10 text-zinc-300 hover:text-red-300 rounded-xl text-[11px] font-mono transition-all cursor-pointer font-bold shrink-0 shadow-lg"
-          >
-            <X className="w-4 h-4 text-red-400" /> 닫기 (ESC)
-          </button>
-        </div>
-
-        {isLocked && (
-          /* PASSCODE INTERLOCK GATE */
-          <div className="max-w-xl mx-auto my-auto bg-zinc-900/60 border border-[#07569b]/25 rounded-2xl p-8 backdrop-blur-md text-center shadow-[0_0_25px_rgba(7,86,155,0.1)] relative z-10">
-            <div className="w-12 h-12 bg-[#07569b]/10 border border-[#07569b]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock className="w-5 h-5 text-[#07569b]" />
-            </div>
-            <h4 className="text-base font-sans font-semibold text-white tracking-tight">원격 보안 잠금 // 대표 핵심 기획안 보호</h4>
-            <p className="text-zinc-400 text-[11px] mt-2 leading-relaxed">
-              본 작품은 독자적인 발광 다이오드 구조 특허 공법 및 로고 디자인 자산 보호를 위해 시안 열람이 통제되어 있습니다. 
-              <strong> 채용담당자 전용 패스코드</strong>를 기입하시면 원본 제한 도면 시안의 락이 즉시 해제됩니다.
-            </p>
-            
-            <form onSubmit={handleUnlockSubmit} className="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
-              <input 
-                type="password"
-                value={passInput}
-                onChange={(e) => setPassInput(e.target.value)}
-                placeholder="채용인증 비밀번호"
-                className="bg-zinc-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#07569b]/80 w-full sm:max-w-[200px]"
-              />
-              <button 
-                type="submit"
-                className="bg-[#07569b] hover:bg-blue-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+        {!isLocked && (
+          /* Slideshow Status & Quick Control */
+          <div className="flex items-center gap-2 shrink-0">
+            {allImages.length > 1 && (
+              <button
+                type="button"
+                onClick={() => setIsPlaying(!isPlaying)}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold transition-all shrink-0 cursor-pointer ${
+                  isPlaying 
+                    ? "bg-[#07569b] text-white shadow-[0_0_20px_rgba(7,86,155,0.6)] animate-pulse" 
+                    : "bg-amber-500/20 border border-amber-500/50 text-amber-300 hover:bg-amber-500/30"
+                }`}
               >
-                도면 시안 잠금해제 <ArrowRight className="w-4 h-4" />
+                {isPlaying ? (
+                  <><Pause className="w-3.5 h-3.5 fill-current" /> 부드러운 자동 슬라이드 중</>
+                ) : (
+                  <><Play className="w-3.5 h-3.5 fill-current" /> 슬라이드 재생 정지됨 (멈춤 뷰어)</>
+                )}
               </button>
-            </form>
-
-            {passError && (
-              <p className="text-red-400 text-[10px] mt-2.5 font-mono">
-                ❌ 불일치: 비밀번호가 올바르지 않습니다.
-              </p>
             )}
           </div>
         )}
 
+        {/* Right ESC Close Button Highlighted */}
+        <div className="flex items-center gap-2 ml-auto md:ml-0">
+          <button 
+            onClick={onClose}
+            title="키보드 ESC 버튼을 누르셔도 창이 즉시 닫힙니다"
+            className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600 border border-red-500/50 hover:border-red-500 text-red-200 hover:text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-[0_0_15px_rgba(239,68,68,0.25)] group"
+          >
+            <X className="w-4 h-4 text-red-400 group-hover:text-white transition-colors" /> 
+            <span>창 닫기 <strong className="bg-red-950 px-1.5 py-0.5 rounded text-[10px] text-red-300 group-hover:bg-red-800 group-hover:text-white ml-1">ESC 버튼</strong></span>
+          </button>
+        </div>
+
+      </header>
+
+      {/* FULLSCREEN IMMERSIVE ARTWORK STAGE */}
+      <main className="relative flex-1 w-full h-full min-h-0 flex flex-col items-center justify-center overflow-hidden bg-zinc-950">
+        
         {!isLocked && (
-          <div className="flex flex-col lg:flex-row gap-5 relative z-10 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
+          /* TOP DEDICATED THUMBNAILS CARD PANEL */
+          <div className="w-full max-w-7xl mx-auto shrink-0 pt-3 pb-1 px-4 z-35 flex items-center justify-center select-none">
+            <div className="w-full bg-zinc-900/95 border border-white/15 rounded-2xl p-2.5 shadow-2xl backdrop-blur-xl flex items-center justify-center gap-2 overflow-x-auto scrollbar-none">
+              <div className="flex items-center justify-center gap-2 overflow-x-auto scrollbar-none my-auto max-w-full py-0.5 px-1">
+                {allImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleThumbnailClick(idx)}
+                    className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-sans transition-all cursor-pointer shrink-0 border ${
+                      activeImageIndex === idx
+                        ? "bg-[#07569b] text-white font-extrabold border-blue-400 shadow-[0_0_15px_rgba(7,86,155,0.8)] scale-105 z-10"
+                        : "bg-zinc-800/90 text-zinc-300 border-white/10 hover:text-white hover:bg-zinc-700 hover:border-white/30"
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${activeImageIndex === idx ? "bg-white animate-ping" : "bg-zinc-500"}`} />
+                    <span className="whitespace-nowrap font-medium">{img.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Background Subtle Watermark */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center select-none overflow-hidden opacity-[0.015]">
+          <div className="text-white text-xl font-mono font-black uppercase tracking-[0.5em] -rotate-12 whitespace-nowrap leading-loose">
+            CONFIDENTIAL DIGITAL PORTFOLIO PORTAL • HA SEUNG WAN SIGNMASTER • {currentTime} • DO NOT COPY OR DISTRIBUTE • CONFIDENTIAL DIGITAL PORTFOLIO PORTAL
+          </div>
+        </div>
+
+        {isLocked ? (
+          /* PASSCODE INTERLOCK GATE */
+          <div className="max-w-xl mx-auto my-auto bg-zinc-900/80 border border-[#07569b]/30 rounded-2xl p-8 backdrop-blur-xl text-center shadow-[0_0_50px_rgba(7,86,155,0.15)] relative z-20">
+            <div className="w-14 h-14 bg-[#07569b]/15 border border-[#07569b]/30 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <Lock className="w-6 h-6 text-[#07569b]" />
+            </div>
+            <h4 className="text-lg font-sans font-bold text-white tracking-tight">원격 보안 잠금 // 대표 핵심 기획안 보호</h4>
+            <p className="text-zinc-400 text-xs mt-2.5 leading-relaxed">
+              본 작품은 독자적인 발광 다이오드 구조 특허 공법 및 로고 디자인 자산 보호를 위해 시안 열람이 통제되어 있습니다. 
+              <strong> 채용담당자 전용 패스코드</strong>를 기입하시면 고화질 원본 도면 시안의 락이 즉시 해제됩니다.
+            </p>
             
-            {/* LEFT SIDEBAR: Problem/Strategy & Smart Thumbnails Rail (Desktop: w-320px) */}
-            <div className="w-full lg:w-[310px] xl:w-[340px] shrink-0 flex flex-col gap-3.5 order-2 lg:order-1 overflow-y-auto lg:pr-1.5 scrollbar-thin scrollbar-thumb-zinc-800">
-              
-              {/* Problem & Strategy Combined Context Box */}
-              <div className="bg-zinc-900/40 border border-white/5 rounded-xl p-4 flex flex-col gap-3.5 select-text shrink-0">
+            <form onSubmit={handleUnlockSubmit} className="mt-6 flex flex-col sm:flex-row gap-2.5 justify-center">
+              <input 
+                type="password"
+                value={passInput}
+                onChange={(e) => setPassInput(e.target.value)}
+                placeholder="채용인증 비밀번호 입력"
+                className="bg-zinc-950 border border-white/15 rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#07569b] w-full sm:max-w-[220px]"
+              />
+              <button 
+                type="submit"
+                className="bg-[#07569b] hover:bg-blue-600 text-white font-bold text-xs px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg"
+              >
+                도면 열람 승인 <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+
+            {passError && (
+              <p className="text-red-400 text-[11px] mt-3 font-mono font-bold animate-shake">
+                ❌ 불일치: 비밀번호가 올바르지 않습니다. 다시 입력해주세요.
+              </p>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* FLOATING OVERLAID LEFT INFO HUD (Problem & Strategy) */}
+            <div className={`absolute top-4 left-4 z-30 transition-all duration-300 max-w-[340px] w-[calc(100%-2rem)] sm:w-[340px] ${
+              showInfoPanel ? "translate-x-0 opacity-100" : "-translate-x-[calc(100%+1rem)] opacity-0 pointer-events-none"
+            }`}>
+              <div className="bg-zinc-950/85 backdrop-blur-2xl border border-white/15 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.9)] text-xs flex flex-col gap-3">
+                
+                {/* HUD Header */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                  <span className="flex items-center gap-1.5 font-mono text-[10px] text-[#07569b] font-bold uppercase tracking-wider">
+                    <Info className="w-3.5 h-3.5 text-[#07569b]" /> 기획 및 설계 조처 요약
+                  </span>
+                  <button
+                    onClick={() => setShowInfoPanel(false)}
+                    className="text-zinc-400 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors cursor-pointer text-[10px] font-mono flex items-center gap-1"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" /> 접기
+                  </button>
+                </div>
+
+                {/* Problem Section */}
                 <div>
-                  <div className="flex items-center gap-1.5 text-red-400 font-semibold text-[10px] uppercase tracking-wider mb-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    01. 현장 과제 (PROBLEM)
+                  <div className="flex items-center gap-1 text-red-400 font-semibold text-[10px] uppercase tracking-wider mb-1">
+                    <AlertCircle className="w-3 h-3" /> 01. 현장 과제 (PROBLEM)
                   </div>
-                  <p className="text-zinc-350 text-xs font-sans leading-relaxed">
+                  <p className="text-zinc-300 text-[11px] font-sans leading-relaxed pl-4 border-l border-red-500/30">
                     {project.problem}
                   </p>
                 </div>
 
-                <div className="border-t border-white/5 pt-3">
-                  <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-[10px] uppercase tracking-wider mb-1.5">
-                    <Lightbulb className="w-3.5 h-3.5 shrink-0" />
-                    02. 설계 공간 조처 (STRATEGY)
+                {/* Strategy Section */}
+                <div className="border-t border-white/5 pt-2">
+                  <div className="flex items-center gap-1 text-emerald-400 font-semibold text-[10px] uppercase tracking-wider mb-1.5">
+                    <Lightbulb className="w-3 h-3" /> 02. 설계 공간 조처 (STRATEGY)
                   </div>
-                  <ul className="flex flex-col gap-1.5">
-                    {project.strategy.map((item, index) => (
-                      <li key={index} className="text-zinc-300 text-[11px] font-sans leading-relaxed flex gap-1.5">
-                        <span className="text-emerald-400 font-mono font-bold shrink-0">{index + 1}.</span>
+                  <ul className="flex flex-col gap-1.5 pl-1">
+                    {project.strategy.map((item, idx) => (
+                      <li key={idx} className="text-zinc-300 text-[10.5px] font-sans leading-relaxed flex gap-1.5 items-start">
+                        <span className="text-emerald-400 font-mono font-bold text-[10px] mt-0.5 shrink-0">{idx + 1}.</span>
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
+
+                {/* Anti-capture Notice inside HUD */}
+                <div className="bg-red-950/30 border border-red-500/20 p-2 rounded-xl text-[9.5px] text-red-300 flex items-center gap-1.5 font-mono">
+                  <ShieldCheck className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                  <span>캡처 시도 감지 시 즉시 원본 보안 블랙아웃 연동</span>
+                </div>
+
               </div>
+            </div>
 
-              {/* Smart Thumbnails Rail Switcher */}
-              {allImages.length > 0 && (
-                <div className="bg-zinc-900/40 border border-white/5 rounded-xl p-3.5 flex flex-col gap-2.5 shrink-0">
-                  <div className="flex items-center justify-between text-[#07569b] font-semibold text-[10px] uppercase tracking-wider">
-                    <span className="flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-[#07569b]" />
-                      🖼️ 썸네일 (클릭 시 작품 이동)
-                    </span>
-                    <span className="text-zinc-500 font-mono text-[8px]">{allImages.length} VIEWS</span>
-                  </div>
+            {/* Collapsed Info HUD Open Pill Button (When panel closed) */}
+            {!showInfoPanel && (
+              <button
+                onClick={() => setShowInfoPanel(true)}
+                className="absolute top-4 left-4 z-30 bg-zinc-900/90 hover:bg-[#07569b] border border-white/20 text-white px-3.5 py-2 rounded-xl backdrop-blur-xl shadow-2xl flex items-center gap-2 text-xs font-mono font-bold transition-all cursor-pointer animate-fade-in"
+              >
+                <Eye className="w-4 h-4 text-[#07569b] group-hover:text-white" /> 기획 설명 펼치기 (INFO)
+              </button>
+            )}
 
-                  <div className="grid grid-cols-2 gap-2 overflow-y-auto max-h-[240px] pr-0.5 scrollbar-none">
-                    {allImages.map((img, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() => setActiveImageIndex(index)}
-                        className={`group relative rounded-lg overflow-hidden border transition-all text-left cursor-pointer flex flex-col bg-black/40 h-20 ${
-                          activeImageIndex === index
-                            ? "border-[#07569b] ring-2 ring-[#07569b]/30 shadow-md bg-zinc-900"
-                            : "border-white/5 hover:border-white/20 opacity-75 hover:opacity-100"
-                        }`}
-                        title={img.label}
-                      >
-                        {/* Thumbnail Image */}
-                        <div className="w-full h-13 overflow-hidden relative bg-black/60">
-                          <img 
-                            src={img.url} 
-                            alt={img.label}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            referrerPolicy="no-referrer"
-                          />
-                          {activeImageIndex === index && (
-                            <span className="absolute top-1 right-1 bg-[#07569b] text-white text-[6px] font-mono font-bold px-1 py-0.5 rounded shadow uppercase">
-                              ACTIVE
-                            </span>
-                          )}
-                        </div>
-                        {/* Clearly Visible Thumbnail Title */}
-                        <div className="flex-1 px-1.5 py-0.5 bg-zinc-950/95 flex items-center justify-center border-t border-white/5">
-                          <span className="text-[9px] font-sans text-zinc-200 font-medium truncate block w-full text-center">
-                            {img.label}
-                          </span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+            {/* MASSIVE IMMERSIVE CENTER CANVAS STAGE */}
+            <div className="w-full h-full grid place-items-center p-2 md:p-6 relative">
+              
+              {/* Active print-screen / capture blackout protector mask */}
+              {blackoutActive && (
+                <div className="absolute inset-4 bg-black/99 border border-red-500/60 z-50 rounded-2xl flex flex-col items-center justify-center p-6 text-center shadow-2xl backdrop-blur-3xl">
+                  <ShieldCheck className="w-16 h-16 text-red-500 animate-bounce mb-4" />
+                  <h4 className="text-white font-mono text-sm md:text-base font-black tracking-widest uppercase mb-2">
+                    ⚠️ SECURITY SHIELD ENGAGED / 원본 지식재산 보호 차단막 작동
+                  </h4>
+                  <p className="text-zinc-400 text-xs max-w-md leading-relaxed">
+                    디자이너의 핵심 설계 도면 및 로고 자산 보호를 위해 단축키 캡처 시도 시 원본 도면을 차단합니다.
+                  </p>
                 </div>
               )}
 
-              {/* Compact Guide Footer */}
-              <div className="text-[9px] text-zinc-500 font-mono bg-black/40 p-2.5 rounded-xl border border-white/5 leading-relaxed text-center mt-auto shrink-0 hidden lg:block">
-                💡 <strong className="text-zinc-400">ESC</strong> 키를 누르면 이전 목록으로 복귀합니다.
-              </div>
-
-            </div>
-
-            {/* RIGHT HERO STAGE: Main Massive Artwork Area (flex-1) */}
-            <div className="flex-1 flex flex-col order-1 lg:order-2 min-w-0 min-h-[420px] lg:min-h-0">
-              <div className="w-full h-full flex flex-col relative bg-zinc-900/20 border border-white/10 rounded-xl overflow-hidden flex-1 justify-center items-center p-2 md:p-4 group">
-                
-                {/* Floating Top-Left Viewer Badge */}
-                <div className="absolute top-3 left-3.5 z-20 pointer-events-none flex items-center gap-2">
-                  <span className="bg-black/80 backdrop-blur border border-white/10 px-2.5 py-1 rounded-md text-[9.5px] font-mono text-zinc-300 font-semibold flex items-center gap-1.5 shadow-lg">
-                    <Sparkles className="w-3 h-3 text-[#07569b]" /> 초고화질 도면 뷰어 (도면 확대)
-                  </span>
-                  {project.splitViewerEnabled && (
-                    <span className="bg-[#07569b]/20 border border-[#07569b]/40 text-[#07569b] px-2 py-0.5 rounded text-[8px] font-mono font-bold uppercase hidden sm:inline">
-                      Shield Secured
-                    </span>
-                  )}
-                </div>
-
-                {/* Floating Top-Right Active Image Label */}
-                <div className="absolute top-3 right-3.5 z-20 pointer-events-none">
-                  <span className="bg-black/80 backdrop-blur border border-white/10 px-2.5 py-1 rounded-md text-[9.5px] font-mono text-zinc-400 shadow-lg">
-                    {activeImage.label} ({activeImageIndex + 1}/{allImages.length})
-                  </span>
-                </div>
-
-                {/* Main Hero Image Canvas */}
-                <div className="w-full h-full flex items-center justify-center relative my-auto overflow-hidden">
-                  
-                  {/* Active print-screen / capture blackout protector mask */}
-                  {blackoutActive && (
-                    <div className="absolute inset-0 bg-black/99 border border-red-500/50 z-50 rounded-xl flex flex-col items-center justify-center p-6 text-center shadow-2xl backdrop-blur-2xl">
-                      <ShieldCheck className="w-12 h-12 text-red-500 animate-bounce mb-3" />
-                      <h4 className="text-white font-mono text-xs font-black tracking-widest uppercase mb-2">
-                        ⚠️ SECURITY SHIELD ENGAGED / 화면 캡쳐 가공 방지 차단막 작동
-                      </h4>
-                      <p className="text-zinc-400 text-[10px] max-w-sm leading-relaxed">
-                        디자이너의 소중한 지식재산 보호 목적을 위해, 캡처 단축키 작동시 자동으로 원본 도면을 숨김 처리합니다.
-                      </p>
-                    </div>
-                  )}
-
-                  {project.splitViewerEnabled ? (
-                    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-black/80 shadow-2xl p-1 pointer-events-none select-none max-w-full">
-                      <SplitCanvasViewer
-                        imageUrl={activeImage.url}
-                        alt={activeImage.label}
-                        watermarkText={`HSW SECURE DESIGN PREVENT COPY ${currentTime}`}
-                      />
-                    </div>
-                  ) : (
+              <AnimatePresence>
+                {project.splitViewerEnabled ? (
+                  <motion.div
+                    key={activeImageIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                    className="col-start-1 row-start-1 w-full h-full max-w-[1500px] max-h-[82vh] flex items-center justify-center relative overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-2xl p-1 pointer-events-none select-none"
+                  >
+                    <SplitCanvasViewer
+                      imageUrl={activeImage.url}
+                      alt={activeImage.label}
+                      watermarkText={`HSW SECURE DESIGN PREVENT COPY ${currentTime}`}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key={activeImageIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                    className="col-start-1 row-start-1 relative max-w-full max-h-[82vh] flex items-center justify-center pointer-events-none select-none"
+                  >
                     <img
                       src={activeImage.url}
                       alt={activeImage.label}
-                      className="max-w-full max-h-[68vh] lg:max-h-[calc(100vh-11rem)] object-contain select-none pointer-events-none drop-shadow-[0_15px_35px_rgba(0,0,0,0.85)]"
+                      className="max-w-full max-h-[80vh] object-contain select-none pointer-events-none drop-shadow-[0_20px_60px_rgba(0,0,0,0.95)]"
                       referrerPolicy="no-referrer"
                     />
-                  )}
-                </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-                {/* Subtle Footer hint inside Stage */}
-                <div className="absolute bottom-2.5 inset-x-0 text-center pointer-events-none opacity-50 hidden sm:block">
-                  <span className="text-[8px] font-mono text-zinc-400 uppercase tracking-widest bg-black/70 border border-white/5 px-2.5 py-0.5 rounded">
-                    ESC 키를 누르면 목록으로 복귀합니다 • 고선명 원본 배율 유지
-                  </span>
-                </div>
-
-              </div>
             </div>
 
-          </div>
+            {/* Bottom Floating Status Hint Bar */}
+            <div className="absolute bottom-3 inset-x-0 flex justify-center pointer-events-none z-20 px-4">
+              <div className="bg-black/85 backdrop-blur-md border border-white/15 px-4 py-2 rounded-full text-[10px] font-mono text-zinc-300 flex items-center gap-3 shadow-2xl">
+                <span className="text-white font-bold text-[#07569b] bg-blue-950/50 px-2 py-0.5 rounded">{activeImage.label}</span>
+                <span className="text-zinc-600">|</span>
+                <span>{activeImageIndex + 1} of {allImages.length}</span>
+                <span className="text-zinc-600">|</span>
+                <span className="text-zinc-400">상단 썸네일 클릭 시 고정 // <strong className="text-red-300 font-bold">ESC 버튼</strong> 입력 시 창 해제</span>
+              </div>
+            </div>
+          </>
         )}
 
-      </div>
+      </main>
     </div>
   );
 }

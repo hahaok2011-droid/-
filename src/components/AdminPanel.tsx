@@ -153,13 +153,18 @@ function ImageUploadField({
       </div>
 
       {/* Manual URL entry field as fall back */}
-      <input 
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="또는 직접 웹 이미지 주소(URL)를 입력하십시오."
-        className="w-full bg-zinc-950 border border-white/5 rounded-xl px-2.5 py-1.5 text-[10px] text-zinc-450 placeholder-zinc-700 font-sans focus:outline-none focus:border-white/15"
-      />
+      <div className="flex flex-col gap-1 mt-1">
+        <span className="text-[10px] font-mono text-amber-400 font-bold tracking-tight">
+          🔗 작품 링크 / 이미지 경로 입력칸 (예: /성모1.jpg 또는 https://...)
+        </span>
+        <input 
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="이곳에 이미지 주소나 /파일명.jpg 를 직접 입력하세요!"
+          className="w-full bg-zinc-900 border border-amber-500/50 hover:border-amber-400 focus:border-amber-300 rounded-xl px-3 py-2.5 text-xs md:text-sm text-amber-200 font-mono font-extrabold placeholder-zinc-400 focus:outline-none focus:bg-zinc-950 shadow-md transition-all select-all"
+        />
+      </div>
     </div>
   );
 }
