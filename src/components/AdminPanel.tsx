@@ -318,8 +318,8 @@ export default function AdminPanel({
     setFormLayoutDesc(p.layoutDesc);
     setFormImgBefore(p.imgBefore);
     setFormImgAfter(p.imgAfter);
-    setFormImgBeforeLabel(p.imgBeforeLabel || "시공 전 (BEFORE)");
-    setFormImgAfterLabel(p.imgAfterLabel || "성공 시공 (AFTER)");
+    setFormImgBeforeLabel(p.imgBeforeLabel || "대표 이미지 2");
+    setFormImgAfterLabel(p.imgAfterLabel || "대표 이미지 1");
     setFormAdditionalImages(p.additionalImages || []);
     setFormResult(p.result);
     setFormIsPremium(p.isPremium);
@@ -344,8 +344,8 @@ export default function AdminPanel({
     setFormLayoutDesc("");
     setFormImgBefore("https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=800&q=80");
     setFormImgAfter("https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80");
-    setFormImgBeforeLabel("시공 전 (BEFORE)");
-    setFormImgAfterLabel("성공 시공 (AFTER)");
+    setFormImgBeforeLabel("대표 이미지 2");
+    setFormImgAfterLabel("대표 이미지 1");
     setFormAdditionalImages([]);
     setFormResult("");
     setFormIsPremium(false);
@@ -950,42 +950,42 @@ export default function AdminPanel({
 
                       {/* Image URLs */}
                       <div className="flex flex-col gap-1.5 w-full">
-                        <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">시공전 슬라이드 타이틀 (Label)</label>
-                        <input 
-                          type="text"
-                          value={formImgBeforeLabel}
-                          onChange={(e) => setFormImgBeforeLabel(e.target.value)}
-                          className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-200"
-                          placeholder="시공 전 (BEFORE)"
-                        />
-                        <ImageUploadField 
-                          label="시공전 Before 사진 등록"
-                          value={formImgBefore}
-                          onChange={setFormImgBefore}
-                          onFileLoaded={setFormImgBefore}
-                          id="file-before"
-                          accentColorClass="text-red-500 font-bold"
-                          borderColorClass="border-red-500/50"
-                        />
-                      </div>
-
-                      <div className="flex flex-col gap-1.5 w-full">
-                        <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">시공후 슬라이드 타이틀 (Label)</label>
+                        <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">대표 이미지 1 타이틀 (Label)</label>
                         <input 
                           type="text"
                           value={formImgAfterLabel}
                           onChange={(e) => setFormImgAfterLabel(e.target.value)}
                           className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-200"
-                          placeholder="성공 시공 (AFTER)"
+                          placeholder="대표 이미지 1"
                         />
                         <ImageUploadField 
-                          label="시공후 After 사진 등록"
+                          label="대표 이미지 1 등록 (메인)"
                           value={formImgAfter}
                           onChange={setFormImgAfter}
                           onFileLoaded={setFormImgAfter}
                           id="file-after"
-                          accentColorClass="text-emerald-500 font-bold"
-                          borderColorClass="border-emerald-500/50"
+                          accentColorClass="text-[#07569b] font-bold"
+                          borderColorClass="border-[#07569b]/50"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1.5 w-full">
+                        <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">대표 이미지 2 타이틀 (Label - 선택)</label>
+                        <input 
+                          type="text"
+                          value={formImgBeforeLabel}
+                          onChange={(e) => setFormImgBeforeLabel(e.target.value)}
+                          className="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-200"
+                          placeholder="대표 이미지 2"
+                        />
+                        <ImageUploadField 
+                          label="대표 이미지 2 등록 (선택)"
+                          value={formImgBefore}
+                          onChange={setFormImgBefore}
+                          onFileLoaded={setFormImgBefore}
+                          id="file-before"
+                          accentColorClass="text-zinc-400 font-bold"
+                          borderColorClass="border-white/10"
                         />
                       </div>
 
@@ -994,9 +994,9 @@ export default function AdminPanel({
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-zinc-900/60 p-3 rounded-xl border border-white/5 gap-2">
                           <div>
                             <h5 className="text-xs font-bold text-amber-500 font-sans flex items-center gap-1">
-                              📸 추가 전경 사진 정보 ({formAdditionalImages.length}개 추가됨)
+                              📸 추가 작품 사진 정보 ({formAdditionalImages.length}개 추가됨)
                             </h5>
-                            <p className="text-[10px] text-zinc-500 mt-0.5">상세 보기 화면에서 추가 사진 갤러리로 출력됩니다.</p>
+                            <p className="text-[10px] text-zinc-500 mt-0.5">상세 보기 화면에서 대형 갤러리 이미지로 전환 감상할 수 있습니다.</p>
                           </div>
                           <button
                             type="button"
