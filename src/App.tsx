@@ -21,6 +21,8 @@ import {
   ChevronDown, Layers, Award, Radio, ShieldCheck, MapPin 
 } from "lucide-react";
 
+const PROJECTS_STORE_KEY = "hsw_portfolio_projects_data_v32";
+
 export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>([]);
@@ -36,21 +38,65 @@ export default function App() {
 
   // Initialize and check LocalStorage
   useEffect(() => {
-    // 1. Projects
-    const cachedProjects = localStorage.getItem("hsw_projects_v17");
-    if (cachedProjects) {
-      try {
-        setProjects(JSON.parse(cachedProjects));
-      } catch (err) {
-        setProjects(INITIAL_PROJECTS);
+    // 1. Projects - 기존 버전 키 모두 탐색하여 사용자 수정본 마이그레이션 및 영구 보존
+    const possibleKeys = [
+      PROJECTS_STORE_KEY,
+      "hsw_portfolio_projects_data",
+      "hsw_projects_v23",
+      "hsw_projects_v22",
+      "hsw_projects_v21",
+      "hsw_projects_v20",
+      "hsw_projects_v19",
+      "hsw_projects_v18",
+      "hsw_projects"
+    ];
+
+    let loadedProjects = null;
+    for (const key of possibleKeys) {
+      const cached = localStorage.getItem(key);
+      if (cached) {
+        try {
+          loadedProjects = JSON.parse(cached);
+          break;
+        } catch (e) {
+          // JSON 파싱 실패시 다음 키 탐색
+        }
       }
+    }
+
+    if (loadedProjects && Array.isArray(loadedProjects) && loadedProjects.length > 0) {
+      // 코드 상의 INITIAL_PROJECTS 최신 변경사항(부천샘물교회 타이틀 등)을 최우선으로 강제 반영
+      let syncedProjects = INITIAL_PROJECTS.map(initP => {
+        const cachedP = loadedProjects.find((p: any) => p.id === initP.id);
+        if (cachedP) {
+          return {
+            ...cachedP,
+            ...initP
+          };
+        }
+        return initP;
+      });
+
+      // 사용자가 어드민 패널에서 새로 추가한 커스텀 신규 작품이 캐시에 있다면 뒤에 유지
+      loadedProjects.forEach((p: any) => {
+        if (!syncedProjects.some(sp => sp.id === p.id)) {
+          syncedProjects.push(p);
+        }
+      });
+
+      // 삭제 요청된 작품(라온도예: raon-pottery)이 로컬 캐시에 남아있을 경우 자동 제거
+      syncedProjects = syncedProjects.filter(p => p.id !== "raon-pottery" && !p.title.includes("라온도예"));
+
+      setProjects(syncedProjects);
+      // 영구 통합 키에 동기화 저장
+      localStorage.setItem(PROJECTS_STORE_KEY, JSON.stringify(syncedProjects));
     } else {
       setProjects(INITIAL_PROJECTS);
-      localStorage.setItem("hsw_projects_v17", JSON.stringify(INITIAL_PROJECTS));
+      localStorage.setItem(PROJECTS_STORE_KEY, JSON.stringify(INITIAL_PROJECTS));
     }
 
     // 2. Workflows
-    const cachedWorkflow = localStorage.getItem("hsw_workflow");
+    const cachedWorkflow = localStorage.getItem("hsw_workflow_v4");
     if (cachedWorkflow) {
       try {
         setWorkflowSteps(JSON.parse(cachedWorkflow));
@@ -59,11 +105,11 @@ export default function App() {
       }
     } else {
       setWorkflowSteps(WORKFLOW_STEPS);
-      localStorage.setItem("hsw_workflow", JSON.stringify(WORKFLOW_STEPS));
+      localStorage.setItem("hsw_workflow_v4", JSON.stringify(WORKFLOW_STEPS));
     }
 
     // 3. Tool Skills
-    const cachedSkills = localStorage.getItem("hsw_skills");
+    const cachedSkills = localStorage.getItem("hsw_skills_v3");
     if (cachedSkills) {
       try {
         setToolSkills(JSON.parse(cachedSkills));
@@ -72,7 +118,7 @@ export default function App() {
       }
     } else {
       setToolSkills(TOOL_SKILLS);
-      localStorage.setItem("hsw_skills", JSON.stringify(TOOL_SKILLS));
+      localStorage.setItem("hsw_skills_v3", JSON.stringify(TOOL_SKILLS));
     }
 
     // 4. Certifications
@@ -91,7 +137,7 @@ export default function App() {
 
   const handleUpdateProjects = (updated: Project[]) => {
     setProjects(updated);
-    localStorage.setItem("hsw_projects_v17", JSON.stringify(updated));
+    localStorage.setItem(PROJECTS_STORE_KEY, JSON.stringify(updated));
     // If selected project was updated or deleted
     if (selectedProject) {
       const stillExists = updated.find(p => p.id === selectedProject.id);
@@ -105,12 +151,12 @@ export default function App() {
 
   const handleUpdateWorkflow = (updated: WorkflowStep[]) => {
     setWorkflowSteps(updated);
-    localStorage.setItem("hsw_workflow", JSON.stringify(updated));
+    localStorage.setItem("hsw_workflow_v4", JSON.stringify(updated));
   };
 
   const handleUpdateSkills = (updated: ToolSkill[]) => {
     setToolSkills(updated);
-    localStorage.setItem("hsw_skills", JSON.stringify(updated));
+    localStorage.setItem("hsw_skills_v3", JSON.stringify(updated));
   };
 
   const handleUpdateCerts = (updated: Certification[]) => {
@@ -119,9 +165,19 @@ export default function App() {
   };
 
   const handleResetToDefault = () => {
-    localStorage.removeItem("hsw_projects_v17");
+    localStorage.removeItem(PROJECTS_STORE_KEY);
+    localStorage.removeItem("hsw_projects_v23");
+    localStorage.removeItem("hsw_projects_v22");
+    localStorage.removeItem("hsw_projects_v21");
+    localStorage.removeItem("hsw_projects_v20");
+    localStorage.removeItem("hsw_projects_v19");
     localStorage.removeItem("hsw_workflow");
+    localStorage.removeItem("hsw_workflow_v2");
+    localStorage.removeItem("hsw_workflow_v3");
+    localStorage.removeItem("hsw_workflow_v4");
     localStorage.removeItem("hsw_skills");
+    localStorage.removeItem("hsw_skills_v2");
+    localStorage.removeItem("hsw_skills_v3");
     localStorage.removeItem("hsw_certs");
     setProjects(INITIAL_PROJECTS);
     setWorkflowSteps(WORKFLOW_STEPS);
@@ -169,11 +225,11 @@ export default function App() {
       <Watermark />
 
       {/* TOP HEADER NAVIGATION BAR */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white/80 border-b border-slate-200/80 backdrop-blur-md">
+      <header className="fixed top-0 left-0 right-0 z-[9999999] w-full bg-white/90 border-b border-slate-200/80 backdrop-blur-md shadow-sm">
         <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
           
           {/* Logo brand */}
-          <a href="#" className="flex items-center gap-2.5 group">
+          <a href="#" onClick={() => setSelectedProject(null)} className="flex items-center gap-2.5 group">
             <div className="w-7 h-7 rounded bg-[#07569b] flex items-center justify-center font-mono font-black text-white tracking-tighter text-xs group-hover:scale-105 transition-all shadow-[0_0_12px_rgba(7,86,155,0.3)]">
               HSW
             </div>
@@ -184,11 +240,11 @@ export default function App() {
 
           {/* Nav Anchor Links (Desktop) */}
           <nav className="hidden lg:flex items-center gap-8 text-xs font-mono uppercase tracking-[0.2em] text-slate-600 font-bold">
-            <a href="#interactive-nightpath-section" className="hover:text-[#07569b] hover:opacity-100 transition-all">WORK & CITY</a>
-            <a href="#workflow-section" className="hover:text-[#07569b] hover:opacity-100 transition-all">PROCESS</a>
-            <a href="#skills-cert-section" className="hover:text-[#07569b] hover:opacity-100 transition-all">SKILLS</a>
-            <a href="#contact-section" className="hover:text-[#07569b] hover:opacity-100 transition-all">CONTACT</a>
-            <a href="#admin-section" className="hover:text-red-500 text-red-600 border border-red-200 px-2.5 py-1 rounded bg-red-50 transition-all">ADMIN</a>
+            <a href="#interactive-nightpath-section" onClick={() => setSelectedProject(null)} className="hover:text-[#07569b] hover:opacity-100 transition-all cursor-pointer">WORK & CITY</a>
+            <a href="#workflow-section" onClick={() => setSelectedProject(null)} className="hover:text-[#07569b] hover:opacity-100 transition-all cursor-pointer">PROCESS</a>
+            <a href="#skills-cert-section" onClick={() => setSelectedProject(null)} className="hover:text-[#07569b] hover:opacity-100 transition-all cursor-pointer">SKILLS</a>
+            <a href="#contact-section" onClick={() => setSelectedProject(null)} className="hover:text-[#07569b] hover:opacity-100 transition-all cursor-pointer">CONTACT</a>
+            <a href="#admin-section" onClick={() => setSelectedProject(null)} className="hover:text-red-500 text-red-600 border border-red-200 px-2.5 py-1 rounded bg-red-50 transition-all cursor-pointer">ADMIN</a>
           </nav>
 
           {/* Recruiter Premium (VIP Mode Gateway Toggle) Removed according to request */}
@@ -265,18 +321,6 @@ export default function App() {
           unlocked={isUnlocked}
         />
       </section>
-
-      {/* CASE STUDY DETAIL DISPLAY ZONE */}
-      {selectedProject && (
-        <section className="relative z-10 py-10 max-w-7xl mx-auto px-6">
-          <ProjectDetail 
-            project={selectedProject}
-            onClose={() => setSelectedProject(null)}
-            isUnlocked={isUnlocked}
-            onUnlockRequest={handleUnlockVip}
-          />
-        </section>
-      )}
 
       {/* WORKFLOW ROADMAP */}
       <section className="relative z-10 py-16 md:py-24 max-w-7xl mx-auto px-6 border-t border-white/[0.03]">
@@ -379,6 +423,16 @@ export default function App() {
           © 2026 간판디자이너 하승완. PROUDLY DEVELOPED BY HA SEUNG WAN. ALL RIGHTS RESERVED.
         </div>
       </footer>
+
+      {/* FULLSCREEN PROJECT DETAIL OVERLAY (100% Covers Existing Page) */}
+      {selectedProject && (
+        <ProjectDetail 
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+          isUnlocked={isUnlocked}
+          onUnlockRequest={handleUnlockVip}
+        />
+      )}
     </div>
   );
 }

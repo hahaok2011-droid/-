@@ -40,7 +40,8 @@ export default function ProjectDetail({
   const rawImages = [
     project.imgAfter ? { url: project.imgAfter, label: project.imgAfterLabel || "대표 이미지 1" } : null,
     project.imgBefore ? { url: project.imgBefore, label: project.imgBeforeLabel || "대표 이미지 2" } : null,
-    ...(project.additionalImages || []).map((img, idx) => ({ url: img.url, label: img.label || `상세 이미지 ${idx + 1}` }))
+    ...(project.detailImages || []).map((img, idx) => ({ url: img.url, label: img.label || `상세 이미지 ${idx + 1}` })),
+    ...(project.additionalImages || []).map((img, idx) => ({ url: img.url, label: img.label || `추가 이미지 ${idx + 1}` }))
   ].filter((img): img is { url: string; label: string } => !!img && !!img.url);
 
   // Remove any duplicate image URLs
@@ -146,7 +147,7 @@ export default function ProjectDetail({
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/98 backdrop-blur-3xl overflow-hidden flex flex-col select-none"
+      className="fixed top-16 md:top-20 left-0 right-0 bottom-0 z-[999999] bg-[#07070C] overflow-hidden flex flex-col select-none"
       onContextMenu={(e) => e.preventDefault()}
     >
       {/* Floating Active Warning message toast */}
@@ -162,6 +163,13 @@ export default function ProjectDetail({
         
         {/* Title & Badge */}
         <div className="flex items-center gap-2.5 min-w-0 mr-auto md:mr-0">
+          <button 
+            onClick={onClose}
+            title="ESC 버튼을 클릭하여 창을 닫습니다"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-mono font-bold transition-all cursor-pointer shadow-md shrink-0 mr-1"
+          >
+            <X className="w-3.5 h-3.5" /> ESC 창닫기
+          </button>
           <span className="bg-[#07569b]/20 border border-[#07569b]/50 text-blue-300 font-mono text-[10px] font-bold px-3 py-1 rounded-full shrink-0 uppercase shadow-sm">
             {project.category}
           </span>
@@ -203,10 +211,10 @@ export default function ProjectDetail({
           <button 
             onClick={onClose}
             title="키보드 ESC 버튼을 누르셔도 창이 즉시 닫힙니다"
-            className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600 border border-red-500/50 hover:border-red-500 text-red-200 hover:text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-[0_0_15px_rgba(239,68,68,0.25)] group"
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-[0_0_15px_rgba(239,68,68,0.5)] group"
           >
-            <X className="w-4 h-4 text-red-400 group-hover:text-white transition-colors" /> 
-            <span>창 닫기 <strong className="bg-red-950 px-1.5 py-0.5 rounded text-[10px] text-red-300 group-hover:bg-red-800 group-hover:text-white ml-1">ESC 버튼</strong></span>
+            <X className="w-4 h-4 text-white group-hover:rotate-90 transition-transform" /> 
+            <span>창 닫기 <strong className="bg-black/40 px-2 py-0.5 rounded text-[10px] text-amber-300 ml-1 border border-white/20">ESC 버튼</strong></span>
           </button>
         </div>
 
@@ -218,8 +226,8 @@ export default function ProjectDetail({
         {!isLocked && (
           /* TOP DEDICATED THUMBNAILS CARD PANEL */
           <div className="w-full max-w-7xl mx-auto shrink-0 pt-3 pb-1 px-4 z-35 flex items-center justify-center select-none">
-            <div className="w-full bg-zinc-900/95 border border-white/15 rounded-2xl p-2.5 shadow-2xl backdrop-blur-xl flex items-center justify-center gap-2 overflow-x-auto scrollbar-none">
-              <div className="flex items-center justify-center gap-2 overflow-x-auto scrollbar-none my-auto max-w-full py-0.5 px-1">
+            <div className="w-full bg-zinc-900/95 border border-white/15 rounded-2xl p-2.5 shadow-2xl backdrop-blur-xl flex items-center justify-center gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 my-auto max-w-full py-1 px-1 max-h-[130px] overflow-y-auto scrollbar-thin">
                 {allImages.map((img, idx) => (
                   <button
                     key={idx}

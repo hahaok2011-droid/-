@@ -28,13 +28,19 @@ export const INITIAL_PROJECTS: Project[] = [
     layoutDesc: "보행선 기준 눈높이 가시각을 계산한 황금비율 파사드 그리드 배치.",
     imgBefore: "/만수2.jpg",
     imgAfter: "/만수1.jpg",
-    imgBeforeLabel: "정비 전 현장 간판",
-    imgAfterLabel: "정비 후 대표 파사드",
+    imgBeforeLabel: "정비사업 컨셉",
+    imgAfterLabel: "3번구역 대표 파사드",
     additionalImages: [
-      { id: "mansu-img-1", url: "/만수3.jpg", label: "거리 파사드 정비 시안" },
-      { id: "mansu-img-2", url: "/만수4.jpg", label: "야간 LED 발광 연출" },
-      { id: "mansu-img-3", url: "/만수5.jpg", label: "돌출 간판 측면 도면" },
-      { id: "mansu-img-4", url: "/만수6.jpg", label: "소재 마감 사양서" }
+      { id: "mansu-img-1", url: "/만수3.jpg", label: "사이니지배치도" },
+      { id: "mansu-img-2", url: "/만수4.jpg", label: "세부사양 디테일" },
+      { id: "mansu-img-3", url: "/만수5.jpg", label: "1번구역" },
+      { id: "mansu-img-4", url: "/만수6.jpg", label: "2번구역" }
+    ],
+    detailImages: [
+      { id: "mansu-img-1", url: "/만수3.jpg", label: "사이니지배치도" },
+      { id: "mansu-img-2", url: "/만수4.jpg", label: "세부사양 디테일" },
+      { id: "mansu-img-3", url: "/만수5.jpg", label: "1번구역" },
+      { id: "mansu-img-4", url: "/만수6.jpg", label: "2번구역" }
     ],
     result: "특화 거리 상권 방문객 만족도 88% 향상 및 야간 유동인구 35% 증가 기대",
     isPremium: false,
@@ -64,15 +70,21 @@ export const INITIAL_PROJECTS: Project[] = [
     layoutDesc: "조문객의 시선 이동 속도와 동선 피로도를 고려해 가시 영역 중심부에 정돈된 1:1.6 황금비율 웨이파인딩 그리드 적용.",
     imgBefore: "/성모2.jpg",
     imgAfter: "/성모1.jpg",
-    imgBeforeLabel: "시공 전 내부 전경",
-    imgAfterLabel: "메인 파사드 및 로비",
+    imgBeforeLabel: "복도 리모델링 변경",
+    imgAfterLabel: "메인 파사드 사이니지",
     additionalImages: [
-      { id: "seongmo-img-1", url: "/성모2.jpg", label: "안내 데스크 로비" },
-      { id: "seongmo-img-2", url: "/성모3.jpg", label: "호실별 입구 사인" },
-      { id: "seongmo-img-3", url: "/성모4.jpg", label: "층별 웨이파인딩" },
-      { id: "seongmo-img-4", url: "/성모5.jpg", label: "접객실 휴게공간" },
-      { id: "seongmo-img-5", url: "/성모6.jpg", label: "야간 간접조명 연출" },
-      { id: "seongmo-img-6", url: "/성모7.jpg", label: "소재 마감 도면" }
+      { id: "seongmo-img-1", url: "/성모3.jpg", label: "내부 각종 사이니지" },
+      { id: "seongmo-img-2", url: "/성모4.jpg", label: "각종 내부 안내사인" },
+      { id: "seongmo-img-3", url: "/성모5.jpg", label: "접객실 휴게공간 썬팅" },
+      { id: "seongmo-img-4", url: "/성모6.jpg", label: "병원동별 유도 지주사인" },
+      { id: "seongmo-img-5", url: "/성모7.jpg", label: "화살표 안내사인" }
+    ],
+    detailImages: [
+      { id: "seongmo-img-1", url: "/성모3.jpg", label: "내부 각종 사이니지" },
+      { id: "seongmo-img-2", url: "/성모4.jpg", label: "각종 내부 안내사인" },
+      { id: "seongmo-img-3", url: "/성모5.jpg", label: "접객실 휴게공간 썬팅" },
+      { id: "seongmo-img-4", url: "/성모6.jpg", label: "병원동별 유도 지주사인" },
+      { id: "seongmo-img-5", url: "/성모7.jpg", label: "화살표 안내사인" }
     ],
     result: "조문객 동선 안내 문의 65% 감소 및 유가족 공간 만족도 조사 '매우 우수' 94% 달성",
     isPremium: true,
@@ -102,20 +114,27 @@ export const INITIAL_PROJECTS: Project[] = [
     layoutDesc: "공장 메인 게이트 상단 및 공장동 외벽에 대형 채널 레터링을 정돈하여 원거리 인지성 확보.",
     imgBefore: "/씨케이1.jpg",
     imgAfter: "/씨케이2.jpg",
-    imgBeforeLabel: "시공 전 공장 전경",
-    imgAfterLabel: "스마트 공장 메인 파사드",
+    imgBeforeLabel: "CI 제안",
+    imgAfterLabel: "메인 파사드",
     additionalImages: [
-      { id: "cks-img-1", url: "/씨케이1.jpg", label: "공장동 메인 파사드" },
-      { id: "cks-img-2", url: "/씨케이3.jpg", label: "정문 메인 게이트" },
-      { id: "cks-img-3", url: "/씨케이4.jpg", label: "생산동 출입 존" },
-      { id: "cks-img-4", url: "/씨케이5.jpg", label: "단지 내 안전 유도" },
-      { id: "cks-img-5", url: "/씨케이6.jpg", label: "대형 지주 간판 설계" },
-      { id: "cks-img-6", url: "/씨케이7.jpg", label: "야간 외벽 발광 연출" },
-      { id: "cks-img-7", url: "/씨케이8.png", label: "소재 마감 그래픽" }
+      { id: "cks-img-2", url: "/씨케이3.jpg", label: "타 위치 공장 간판 제안" },
+      { id: "cks-img-3", url: "/씨케이4.jpg", label: "입구간판" },
+      { id: "cks-img-4", url: "/씨케이5.jpg", label: "지주형 유도사인A" },
+      { id: "cks-img-5", url: "/씨케이6.jpg", label: "지주형 유도사인B" },
+      { id: "cks-img-6", url: "/씨케이7.jpg", label: "지주형 유도사인C" },
+      { id: "cks-img-7", url: "/씨케이8.png", label: "타 위치 입구간판" }
+    ],
+    detailImages: [
+      { id: "cks-img-2", url: "/씨케이3.jpg", label: "타 위치 공장 간판 제안" },
+      { id: "cks-img-3", url: "/씨케이4.jpg", label: "입구간판" },
+      { id: "cks-img-4", url: "/씨케이5.jpg", label: "지주형 유도사인A" },
+      { id: "cks-img-5", url: "/씨케이6.jpg", label: "지주형 유도사인B" },
+      { id: "cks-img-6", url: "/씨케이7.jpg", label: "지주형 유도사인C" },
+      { id: "cks-img-7", url: "/씨케이8.png", label: "타 위치 입구간판" }
     ],
     result: "바이어 방문 시 기업 신뢰도 평가 최상위 등급 획득 및 공장 단지 유동 안전성 45% 향상",
     isPremium: false,
-    splitViewerEnabled: true,
+    splitViewerEnabled: false,
     x: 72,
     y: 58
   },
@@ -141,15 +160,27 @@ export const INITIAL_PROJECTS: Project[] = [
     layoutDesc: "보행 동선 방해를 최소화하는 슬림 프레임 구조와 게시물 크기별 가변형 자석 게시 판넬 레이아웃.",
     imgBefore: "/게시판2.jpg",
     imgAfter: "/게시판1.jpg",
-    imgBeforeLabel: "상세 설계 도면 및 시안",
-    imgAfterLabel: "외부 게시판 제안 완료 전경",
+    imgBeforeLabel: "외부 지주형 게사판 제안2",
+    imgAfterLabel: "외부 지주형 게사판 제안1",
     additionalImages: [
-      { id: "board-img-1", url: "/게시판2.jpg", label: "정면 외부 게시판 메인 시안" },
-      { id: "board-img-2", url: "/게시판3.jpg", label: "게시판 프레임 및 도어 개폐 구조 시안" },
-      { id: "board-img-3", url: "/게시판4.jpg", label: "측면 슬림 구조 및 개폐 도면" },
-      { id: "board-img-4", url: "/게시판5.jpg", label: "상단 타이틀 바 및 규격 시안" },
-      { id: "board-img-5", url: "/게시판6.jpg", label: "현장 설치 위치 시뮬레이션 A" },
-      { id: "board-img-6", url: "/게시판7.jpg", label: "현장 설치 위치 시뮬레이션 B" }
+      { id: "board-img-2", url: "/게시판3.jpg", label: "게시판 내용 디자인" },
+      { id: "board-img-3", url: "/게시판4.jpg", label: "현장 시뮬레이션" },
+      { id: "board-img-4", url: "/게시판5.jpg", label: "게시판 내용 디자인" },
+      { id: "board-img-5", url: "/게시판6.jpg", label: "현장 시뮬레이션" },
+      { id: "board-img-6", url: "/게시판7.jpg", label: "현장 시뮬레이션" },
+      { id: "board-img-7", url: "/게시판8.jpg", label: "타 동 게시판 제안" },
+      { id: "board-img-8", url: "/게시판9.jpg", label: "현장 시뮬레이션" },
+      { id: "board-img-9", url: "/게시판10.jpg", label: "현장 시뮬레이션" }
+    ],
+    detailImages: [
+      { id: "board-img-2", url: "/게시판3.jpg", label: "게시판 내용 디자인" },
+      { id: "board-img-3", url: "/게시판4.jpg", label: "현장 시뮬레이션" },
+      { id: "board-img-4", url: "/게시판5.jpg", label: "게시판 내용 디자인" },
+      { id: "board-img-5", url: "/게시판6.jpg", label: "현장 시뮬레이션" },
+      { id: "board-img-6", url: "/게시판7.jpg", label: "현장 시뮬레이션" },
+      { id: "board-img-7", url: "/게시판8.jpg", label: "타 동 게시판 제안" },
+      { id: "board-img-8", url: "/게시판9.jpg", label: "현장 시뮬레이션" },
+      { id: "board-img-9", url: "/게시판10.jpg", label: "현장 시뮬레이션" }
     ],
     result: "공공 정보 접근성 시인성 90% 향상 및 지역 주민 생활 만족도 최우수 평가 달성",
     isPremium: false,
@@ -248,7 +279,13 @@ export const INITIAL_PROJECTS: Project[] = [
     imgAfterLabel: "내외부 사이니지 완료 대표 전경",
     additionalImages: [
       { id: "ksp-img-1", url: "/케이에스3.jpg", label: "외부 메인 파사드 사이니지 전경" },
-      { id: "ksp-img-2", url: "/케이에스2.jpg", label: "내부 로비 및 공장동 상세 시안" }
+      { id: "ksp-img-2", url: "/케이에스2.jpg", label: "내부 로비 및 공장동 상세 시안" },
+      { id: "ksp-img-3", url: "/케이에스4.jpg", label: "사이니지 시공 및 상세 디테일" }
+    ],
+    detailImages: [
+      { id: "ksp-img-1", url: "/케이에스3.jpg", label: "외부 메인 파사드 사이니지 전경" },
+      { id: "ksp-img-2", url: "/케이에스2.jpg", label: "내부 로비 및 공장동 상세 시안" },
+      { id: "ksp-img-3", url: "/케이에스4.jpg", label: "사이니지 시공 및 상세 디테일" }
     ],
     result: "방문 바이어 및 거래처의 기업 신뢰도 만족도 96% 달성 및 물류 차량 진출입 효율성 대폭 개선",
     isPremium: false,
@@ -257,93 +294,338 @@ export const INITIAL_PROJECTS: Project[] = [
     y: 25
   },
   {
-    id: "cheon-dam-dental",
-    title: "청담 이안치과 럭셔리 브랜딩",
+    id: "international-st-marys-hospital",
+    title: "국제성모병원 내외부 사이니지 제안",
     category: "병원",
-    tagline: "치과의 오랜 공포를 우아한 세리프와 메탈 피니시로 무마하다",
-    problem: "소리만으로 압도하는 치과의 차가운 의료 기기 느낌을 외부 사인물이 확대 재생산하고 있었으며, 과도하게 발갛고 번들거리는 이빨 실루엣 간판은 환자들의 진료 거부감을 야기했습니다.",
+    tagline: "대학병원의 신뢰감과 스마트 의료 환경을 체계적으로 안내하는 통합 웨이파인딩",
+    problem: "기존 대학병원 특유의 복잡하고 분산된 동선 구조와 규격화되지 않은 안내 사인물들로 인해 내원객 및 고령 환자들의 진료센터 탐색에 혼선이 잦았으며, 외부 파사드의 야간 식별성이 낮아 응급센터 및 주차장 진입 구분이 불명확했습니다.",
     strategy: [
-      "기괴한 일러스트를 과감하게 소거하고, 주얼리 명품 브랜드 숍의 외경을 오마주한 헤어라인 스테인리스 스틸 무광 간판.",
-      "따뜻한 톤의 사이드 간접 조명을 활용해 은은하고 부드러운 화이트닝 이미지 연출.",
-      "미세 굴곡과 비정형 에칭 가공을 통해 낮 동안 태양광 각도에 따라 간판 그림자가 서정적으로 다변화되도록 유도."
+      "환자 중심의 직관적 컬러 인덱스 시스템과 시인성이 높은 대형 모듈형 간판 설계.",
+      "의료진과 방문객의 동선을 명확히 분리하고 야간 응급 가시성을 극대화한 고휘도 LED 면발광 적용.",
+      "외부 메인 게이트부터 로비, 진료센터 및 병동까지 유기적으로 연결되는 스마트 웨이파인딩 구축."
     ],
-    logoText: "Prestige I'AN DENTAL CLINIC",
+    logoText: "INTERNATIONAL ST. MARY'S HOSPITAL",
     colors: [
-      { name: "Hairline Silver Metal", hex: "#9CA3AF" },
-      { name: "Chic Onyx", hex: "#111827" },
-      { name: "Warm Pearl Linen", hex: "#F3F4F6" }
+      { name: "Medical Trust Navy", hex: "#003A70" },
+      { name: "Clean Cyan Blue", hex: "#00A3E0" },
+      { name: "Warm White Pearl", hex: "#F8FAFC" }
     ],
-    fontFamily: "Bodoni Luxury Serif",
-    fontDescription: "수직과 수평의 대치 기법을 통해 견고한 기술 정밀성과 우아함을 연출하여, 오차 없는 의술의 권위와 진정성을 증명.",
-    layoutDesc: "출입구 전면 필라(Pillar) 중심부에 수직형 럭셔리 매핑으로 배치하여 도심 속 고급스럽고 현대적인 심미성 부각.",
-    imgBefore: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80",
-    imgAfter: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800&q=80",
-    imgBeforeLabel: "리모델링 전 외벽",
-    imgAfterLabel: "무광 스테인리스 파사드",
-    result: "미용/임플란트 고정밀 치료 신규 고수익 환자 유치 건수 85% 폭증, 예술적 공간 연출로 원장 평가 만족",
+    fontFamily: "Pretendard Bold & Neo Sans Medical",
+    fontDescription: "대학병원의 격조와 오차 없는 정밀 의료의 신뢰감을 명료하고 가독성이 뛰어난 모던 산세리프 비례로 강조함.",
+    layoutDesc: "병원 본동 진입로 게이트 상단 및 전면에 대형 메인 파사드 사인을 정렬하여 환자들에게 즉각적인 위치 인지성과 안정감 제공.",
+    imgBefore: "/국제2.jpg",
+    imgAfter: "/국제1.jpg",
+    imgBeforeLabel: "외부사이니지1",
+    imgAfterLabel: "지주형 유도사인 대표 제안",
+    additionalImages: [
+      { id: "st-mary-img-3", url: "/국제3.jpg", label: "외부사이니지2" },
+      { id: "st-mary-img-4", url: "/국제4.jpg", label: "지하 안내 웨이파인딩" },
+      { id: "st-mary-img-5", url: "/국제5.jpg", label: "지하 안내 웨이파인딩" },
+      { id: "st-mary-img-6", url: "/국제6.jpg", label: "내부 호실 사이니지" },
+      { id: "st-mary-img-7", url: "/국제7.jpg", label: "내부 호실 표찰" }
+    ],
+    detailImages: [
+      { id: "st-mary-img-3", url: "/국제3.jpg", label: "외부사이니지2" },
+      { id: "st-mary-img-4", url: "/국제4.jpg", label: "지하 안내 웨이파인딩" },
+      { id: "st-mary-img-5", url: "/국제5.jpg", label: "지하 안내 웨이파인딩" },
+      { id: "st-mary-img-6", url: "/국제6.jpg", label: "내부 호실 사이니지" },
+      { id: "st-mary-img-7", url: "/국제7.jpg", label: "내부 호실 표찰" }
+    ],
+    result: "내원객 진료과 탐색 소요 시간 40% 단축 및 환자 만족도 평가에서 웨이파인딩 부문 최우수 등급 달성",
     isPremium: false,
     splitViewerEnabled: false,
     x: 55,
     y: 65
   },
   {
-    id: "raon-pottery",
-    title: "라온도예 감성 아틀리에 사그라들지 않는 점토",
-    category: "기타",
-    tagline: "황토 질감의 고압 테라코타 플레이트와 스텐실의 융합",
-    problem: "매쉬망이나 기성품 시트지에 뽑힌 가벼운 글자가 가치 있는 수공예 도예 공방의 철학을 무너뜨리고 있었으며, 빌라 숲 단지 속에서 상징적인 조형물이 부재하여 길 찾기에 곤란을 주었습니다.",
+    id: "daewoo-interior-car",
+    title: "대우인테리어 차량썬팅 및 랩핑 광고",
+    category: "차량광고",
+    tagline: "이동하는 비즈니스 카드 // 세련된 기업 아이덴티티 차량 랩핑",
+    problem: "기존 업무용 차량 외관에 텍스트만 투박하게 붙어 있어 브랜드 신뢰도를 주지 못했으며, 주행 중 멀리서도 한눈에 인식할 수 있는 직관적인 광고 시인성이 부재했습니다.",
     strategy: [
-      "실제 가마에서 고온 소성한 테라코타 슬래브 위에 공방을 상징하는 점토 형상을 입체 음각 수공 제작.",
-      "점토가 건조되는 자연스러운 색인 테라코타 어스 브라운 컬러와 철제 프레임 부식 마감 기법 사용.",
-      "공방 입구 골목에 입간판 형태로 점토 미어캣 형태의 철제 오브제 설치 및 가로등 겸용 스탠실 조명 매칭."
+      "차량 측면 및 후면에 고해상도 실사 출력 랩핑 필름을 적용하여 변색 및 스크래치 방지 마감.",
+      "브랜드 상징 컬러인 딥 네이비와 에너제틱 골드 포인트 컬러를 조합하여 세련된 시각적 대비 구축.",
+      "운전 중이나 주차 시에도 연락처와 핵심 비즈니스 영역이 명확하게 전달되는 타이포그래피 레이아웃 설계."
     ],
-    logoText: "LAON CERAMIC STUDY",
+    logoText: "DAEWOO INTERIOR DESIGN",
     colors: [
-      { name: "Terracotta Earth", hex: "#9A3412" },
-      { name: "Charcoal Clay", hex: "#1F2937" },
-      { name: "Rustic Ash", hex: "#E5E7EB" }
+      { name: "Deep Navy", hex: "#1E3A8A" },
+      { name: "Energetic Gold", hex: "#D97706" },
+      { name: "Clean White", hex: "#FFFFFF" }
     ],
-    fontFamily: "Pretendard Thin & Handdrawn Core",
-    fontDescription: "손끝의 손길이 고스란히 묻어나는 투박하지만 정감 있는 가느다란 가변 터치의 독창적 서체 기법.",
-    layoutDesc: "공방 외곽 돌담길 정가운데에 600x600 크기로 앙증맞지만 강력한 밀도로 바닥 안착형 미니 기단 스팟라이팅 레이아웃.",
-    imgBefore: "https://images.unsplash.com/photo-1576016770956-debb63d900ad?auto=format&fit=crop&w=800&q=80",
-    imgAfter: "https://images.unsplash.com/photo-1565192647048-f997ecd879f0?auto=format&fit=crop&w=800&q=80",
-    imgBeforeLabel: "설치 전 골목길",
-    imgAfterLabel: "테라코타 입간판",
-    result: "방문 클래스 마감율 3배 연속 기록 달성 및 공방 앞 기념 인지 SNS 공유 빈도 급상승",
+    fontFamily: "Pretendard Bold & Montserrat",
+    fontDescription: "속도감 있는 주행 환경에서도 가독성이 뛰어난 산뜻하고 견고한 산스세리프 서체.",
+    layoutDesc: "차량 도어 측면 핵심 영역과 후면 범퍼 상단에 브랜드 로고 및 연락처를 최적의 비율로 배치한 이동형 사이니지.",
+    imgBefore: "/차량2.jpg",
+    imgAfter: "/차량1.jpg",
+    imgBeforeLabel: "대우인테리어 차량 썬팅 및 랩핑",
+    imgAfterLabel: "차량 전면 및 측면 전경",
+    detailImages: [
+      { id: "daewoo-car-img-1", url: "/차량2.jpg", label: "대우인테리어 차량 랩핑 완료 및 디테일" }
+    ],
+    result: "이동 중 문의 전화 접수율 50% 증가 및 현장 방문 고객의 브랜드 신뢰도 대폭 향상",
     isPremium: false,
-    splitViewerEnabled: true,
-    x: 10,
-    y: 70
+    splitViewerEnabled: false,
+    x: 45,
+    y: 80
+  },
+  {
+    id: "pho98-ricenoodle",
+    title: "Pho98 쌀국수 전문점 브랜딩",
+    category: "음식점",
+    tagline: "정통 베트남 쌀국수의 진한 풍미를 담아낸 이국적인 외부 파사드 & 사이니지",
+    problem: "기존 골목 상권에서 매장 외관이 특색 없이 평범하여 정통 베트남 쌀국수 전문점만의 전문성과 이국적인 분위기가 전달되지 않았으며, 보행자의 시선을 사로잡을 상징적인 포토존이나 야간 조명 사인이 부재했습니다.",
+    strategy: [
+      "베트남 현지의 이국적인 정취를 재해석한 따뜻한 우드 톤의 파사드와 간결한 철제 레터링 조합.",
+      "야간에도 멀리서 눈에 띄도록 고선명 전구색 LED 후광 간접 조명을 배치하여 은은한 감성 연출.",
+      "매장 전면 윈도우에 메뉴 직관성을 높이는 그래픽 시트와 맞춤 제작 입간판으로 고객 유입 동선 강화."
+    ],
+    logoText: "PHO98 RICE NOODLE",
+    colors: [
+      { name: "Vietnamese Green", hex: "#065F46" },
+      { name: "Warm Wood", hex: "#B45309" },
+      { name: "Creamy Broth", hex: "#FEF3C7" }
+    ],
+    fontFamily: "Pretendard Medium & Montserrat Bold",
+    fontDescription: "이국적인 베트남 요리의 감성과 현대적인 모던함을 동시에 보여주는 세련되고 가독성 높은 헤드라인 서체.",
+    layoutDesc: "매장 상단 메인 간판에 450x450 크기의 심볼과 돋보이는 영문/한글 조합 레터링을 황금비율로 안착시킨 정면 중앙 중심 레이아웃.",
+    imgBefore: "/포2.jpg",
+    imgAfter: "/포1.jpg",
+    imgBeforeLabel: "시공전후 시뮬레이션",
+    imgAfterLabel: "전체 설치 완료",
+    detailImages: [
+      { id: "pho98-img-3", url: "/포3.jpg", label: "전면 사이니지 제안" },
+      { id: "pho98-img-4", url: "/포4.jpg", label: "전체 사이니지 시안" },
+      { id: "pho98-img-5", url: "/포5.jpg", label: "배너사인" },
+      { id: "pho98-img-6", url: "/포6.jpg", label: "메뉴사인" }
+    ],
+    additionalImages: [
+      { id: "pho98-img-3", url: "/포3.jpg", label: "전면 사이니지 제안" },
+      { id: "pho98-img-4", url: "/포4.jpg", label: "전체 사이니지 시안" },
+      { id: "pho98-img-5", url: "/포5.jpg", label: "배너사인" },
+      { id: "pho98-img-6", url: "/포6.jpg", label: "메뉴사인" }
+    ],
+    result: "리뉴얼 후 일 평균 방문객 수 80% 증가 및 지역 내 베트남 음식점 핫플레이스로 SNS 후기 다수 공유",
+    isPremium: false,
+    splitViewerEnabled: false,
+    x: 75,
+    y: 40
+  },
+  {
+    id: "pc-cafe-exterior-signage",
+    title: "PC카페 외부 사이니지",
+    category: "유흥시설",
+    tagline: "사이버네틱 감성과 화려한 LED 라인발광이 돋보이는 프리미엄 PC카페 파사드 사이니지",
+    problem: "기존 상업 건물 2층 전면에 위치하여 주변의 번잡한 간판들에 시선이 묻혔으며, 야간 주요 고객층인 MZ세대와 게이머들의 눈길을 사로잡을 미래지향적이고 강렬한 아이덴티티가 부족했습니다.",
+    strategy: [
+      "게이밍 하드웨어를 형상화한 다크 네이비 & 메탈릭 실버 베이스의 전면 파사드 구조물.",
+      "역동적인 RGB 가변 컬러 라인 조명과 입체 LED 레터링을 결합한 하이테크 감성 연출.",
+      "보행자의 시선을 2층으로 자연스럽게 유도하는 돌출 사인 및 계단 입구 연계 웰컴 그래픽 배치."
+    ],
+    logoText: "CYBER ARENA PC CAFE",
+    colors: [
+      { name: "Cyber Neon Blue", hex: "#00F0FF" },
+      { name: "Mecha Silver", hex: "#9CA3AF" },
+      { name: "Dark Void Navy", hex: "#0B0F19" }
+    ],
+    fontFamily: "Orbitron & Pretendard Bold",
+    fontDescription: "미래지향적인 SF 감성과 사이버펑크 무드를 극대화하는 기하학적이고 직선적인 디스플레이 서체.",
+    layoutDesc: "건물 2층 전면 윈도우 프레임을 따라 와이드하게 펼쳐지는 가로형 파사드 구조에 중앙 심볼을 강조한 대칭형 비주얼 레이아웃.",
+    imgBefore: "/피시2.jpg",
+    imgAfter: "/피시1.jpg",
+    imgBeforeLabel: "시공 전 파사드 구조 및 외관",
+    imgAfterLabel: "PC카페 외부 사이니지 메인 전경",
+    detailImages: [
+      { id: "pccafe-img-2", url: "/피시2.jpg", label: "매장 진입로 입구 및 사이니지 구조" },
+      { id: "pccafe-img-3", url: "/피시3.jpg", label: "야간 LED 점등 및 측면 조명 디테일" }
+    ],
+    additionalImages: [
+      { id: "pccafe-img-2", url: "/피시2.jpg", label: "매장 진입로 입구 및 사이니지 구조" },
+      { id: "pccafe-img-3", url: "/피시3.jpg", label: "야간 LED 점등 및 측면 조명 디테일" }
+    ],
+    result: "리뉴얼 후 야간 시간대 신규 방문객 120% 증가 및 MZ 세대 프리미엄 게이밍 아지트로 입소문 확산",
+    isPremium: false,
+    splitViewerEnabled: false,
+    x: 45,
+    y: 65
+  },
+  {
+    id: "bucheon-saemmul-church",
+    title: "부천샘물교회 외부사이니지",
+    category: "종교시설",
+    tagline: "자연친화적인 따뜻한 영성과 은은한 상하부 투광 조명이 조화를 이루는 프리미엄 교회 파사드 사이니지",
+    problem: "기존 외벽 간판이 노후화되고 투박하여 주변 도심 경관 속에서 정적인 이미지로 정체되어 있었으며, 성도들과 지역 사회 방문객들이 품격 있고 따뜻하게 마주할 수 있는 현대적이고 영적인 외관 아이덴티티가 필요했습니다.",
+    strategy: [
+      "자연친화적인 방부목 베이스에 스카시와 알미늄 채널을 조화롭게 배치한 파사드 구조 설계.",
+      "상하부 투광기를 적극 사용하여 외벽 질감과 레터링에 은은한 가시성을 더한 라이팅 연출.",
+      "건물 진입부 메인 입구와 조화롭게 어우러지는 주간/야간 입체형 브랜딩 사이니지 배치."
+    ],
+    logoText: "BUCHEON SAEMMUL CHURCH",
+    colors: [
+      { name: "Natural Wood Warm", hex: "#8B5A2B" },
+      { name: "Warm Sanctuary Light", hex: "#FFF8E7" },
+      { name: "Sacred Stone Gray", hex: "#4A4A4A" }
+    ],
+    fontFamily: "Noto Serif & Pretendard Bold",
+    fontDescription: "종교적 엄숙함과 품격 있는 정갈함을 담아낸 명조 계열 세리프와 높은 판독성의 모던 산세리프 서체의 조화.",
+    layoutDesc: "건물 전면 파사드의 상단 수평축을 중심으로 심볼과 메인 레터링을 조화롭게 배치한 비주얼 레이아웃.",
+    imgBefore: "/샘물2.jpg",
+    imgAfter: "/샘물1.jpg",
+    imgBeforeLabel: "상하부투광기를 활용한 은은한 야간 조명",
+    imgAfterLabel: "외부 사이니지 전경",
+    detailImages: [
+      { id: "saemmul-img-3", url: "/샘물3.jpg", label: "세부디테일 사양" },
+      { id: "saemmul-img-4", url: "/샘물4.jpg", label: "지주 및 게시판" }
+    ],
+    additionalImages: [
+      { id: "saemmul-img-3", url: "/샘물3.jpg", label: "세부디테일 사양" },
+      { id: "saemmul-img-4", url: "/샘물4.jpg", label: "지주 및 게시판" }
+    ],
+    result: "시공 후 지역 사회의 따뜻한 영적 랜드마크로 자리매김하며 성도들의 방문 및 만족도 대폭 향상",
+    isPremium: false,
+    splitViewerEnabled: false,
+    x: 60,
+    y: 30
+  },
+  {
+    id: "the-philip-hospital",
+    title: "더필잎병원 ci 변경 및 내외부 사이니지",
+    category: "병원",
+    tagline: "따뜻하고 신뢰감 있는 치유의 공간을 완성하는 프리미엄 메디컬 파사드 및 인테리어 사이니지",
+    problem: "기존 병원 외관이 복잡한 주변 도심 간판들에 묻혀 시인성이 떨어졌으며, 환자들과 내원객들에게 심리적 안정감과 전문적인 의료 서비스의 신뢰감을 동시에 전달할 수 있는 체계적인 웨이파인딩 및 브랜딩이 필요했습니다.",
+    strategy: [
+      "청결함과 전문성을 강조하는 메디컬 그린 & 소프트 화이트 베이스의 파사드 구조 설계.",
+      "내원객의 진료 동선을 직관적으로 안내하는 체계적인 층별 안내 및 내부 인포그래픽 구축.",
+      "눈부심을 최소화한 은은한 간접 LED 조명과 입체 스카시 사인을 조화롭게 배치한 공간 연출."
+    ],
+    logoText: "THE PHILIP HOSPITAL",
+    colors: [
+      { name: "Medical Calm Green", hex: "#2E7D32" },
+      { name: "Healing Soft White", hex: "#F8FAFC" },
+      { name: "Trust Slate Gray", hex: "#475569" }
+    ],
+    fontFamily: "Pretendard & Montserrat Bold",
+    fontDescription: "의료 기관의 높은 신뢰도와 판독성을 보장하는 모던하고 깔끔한 산세리프 기반 디스플레이 서체.",
+    layoutDesc: "병원 외부 메인 파사드와 실내 로비 안내 데스크를 연계하여 정돈된 대칭감과 안정감을 주는 비주얼 레이아웃.",
+    imgBefore: "/더필잎2.jpg",
+    imgAfter: "/더필잎1.jpg",
+    imgBeforeLabel: "CI변경 제안",
+    imgAfterLabel: "외부 간판 설치",
+    detailImages: [
+      { id: "philip-img-3", url: "/더필잎3.jpg", label: "외부 입구 시안" },
+      { id: "philip-img-4", url: "/더필잎4.jpg", label: "이미지월 변경 설치" },
+      { id: "philip-img-5", url: "/더필잎5.jpg", label: "이미지월 변경 시안" },
+      { id: "philip-img-6", url: "/더필잎6.jpg", label: "층별안내게시판 시안" },
+      { id: "philip-img-7", url: "/더필잎7.jpg", label: "층별안내 행거형 시안" }
+    ],
+    additionalImages: [
+      { id: "philip-img-3", url: "/더필잎3.jpg", label: "외부 입구 시안" },
+      { id: "philip-img-4", url: "/더필잎4.jpg", label: "이미지월 변경 설치" },
+      { id: "philip-img-5", url: "/더필잎5.jpg", label: "이미지월 변경 시안" },
+      { id: "philip-img-6", url: "/더필잎6.jpg", label: "층별안내게시판 시안" },
+      { id: "philip-img-7", url: "/더필잎7.jpg", label: "층별안내 행거형 시안" }
+    ],
+    result: "브랜드 리뉴얼 후 내원 환자 방문 만족도 98% 달성 및 직관적인 안내 체계로 내원객 편의성 대폭 향상",
+    isPremium: false,
+    splitViewerEnabled: false,
+    x: 35,
+    y: 75
+  },
+  {
+    id: "other-artworks-collection",
+    title: "그외 작품모음",
+    category: "기타",
+    tagline: "다양한 업종과 공간의 특성을 살린 감각적이고 다채로운 간판 및 디자인 사인 모음",
+    problem: "각기 다른 브랜드 고유의 아이덴티티와 공간적 제약 속에서 비즈니스 주목도를 높이고 개성 있는 시각적 포인트를 창출하는 맞춤형 사이니지 솔루션이 필요했습니다.",
+    strategy: [
+      "업종별 타겟층과 공간 분위기에 맞춘 다채로운 소재 및 컬러 매칭 설계.",
+      "시각적 집중도를 높이는 직관적인 타이포그래피 및 라이팅 연출.",
+      "브랜드 개성을 극대화하는 맞춤형 오브제 제작 및 정밀 시공."
+    ],
+    logoText: "VARIOUS SIGNAGE WORKS",
+    colors: [
+      { name: "Modern Chrome", hex: "#4A5568" },
+      { name: "Accent Light", hex: "#E2E8F0" },
+      { name: "Deep Solid Gray", hex: "#1A202C" }
+    ],
+    fontFamily: "Montserrat & Oswald & Pretendard",
+    fontDescription: "영문 메인 로고 타이포그래피와 한글 서브 타이틀에 최적화된 높은 균형감의 서체 조화.",
+    layoutDesc: "다양한 규격과 서체를 활용한 브랜드 공간 맞춤형 비주얼 레이아웃.",
+    imgBefore: "/기타1.jpg",
+    imgBeforeLabel: "그외 작품모음 대표 전경",
+    imgAfter: "/기타1.jpg",
+    imgAfterLabel: "그외 작품모음 대표 전경",
+    detailImages: [
+      { id: "other-img-1", url: "/기타2.jpg", label: "작품1" },
+      { id: "other-img-2", url: "/기타3.jpg", label: "작품2" },
+      { id: "other-img-3", url: "/기타4.jpg", label: "작품3" },
+      { id: "other-img-4", url: "/기타5.jpg", label: "작품4" },
+      { id: "other-img-5", url: "/기타6.jpg", label: "작품5" },
+      { id: "other-img-6", url: "/기타7.jpg", label: "작품6" },
+      { id: "other-img-7", url: "/기타8.jpg", label: "작품7" },
+      { id: "other-img-8", url: "/기타9.jpg", label: "작품8" },
+      { id: "other-img-9", url: "/기타10.gif", label: "작품9" },
+      { id: "other-img-10", url: "/기타11.jpg", label: "작품10" },
+      { id: "other-img-11", url: "/기타12.jpg", label: "작품11" },
+      { id: "other-img-12", url: "/기타13.jpg", label: "작품12" },
+      { id: "other-img-13", url: "/기타14.jpg", label: "작품13" },
+      { id: "other-img-14", url: "/기타15.jpg", label: "작품14" },
+      { id: "other-img-15", url: "/기타16.jpg", label: "작품15" }
+    ],
+    additionalImages: [
+      { id: "other-img-1", url: "/기타2.jpg", label: "작품1" },
+      { id: "other-img-2", url: "/기타3.jpg", label: "작품2" },
+      { id: "other-img-3", url: "/기타4.jpg", label: "작품3" },
+      { id: "other-img-4", url: "/기타5.jpg", label: "작품4" },
+      { id: "other-img-5", url: "/기타6.jpg", label: "작품5" },
+      { id: "other-img-6", url: "/기타7.jpg", label: "작품6" },
+      { id: "other-img-7", url: "/기타8.jpg", label: "작품7" },
+      { id: "other-img-8", url: "/기타9.jpg", label: "작품8" },
+      { id: "other-img-9", url: "/기타10.gif", label: "작품9" },
+      { id: "other-img-10", url: "/기타11.jpg", label: "작품10" },
+      { id: "other-img-11", url: "/기타12.jpg", label: "작품11" },
+      { id: "other-img-12", url: "/기타13.jpg", label: "작품12" },
+      { id: "other-img-13", url: "/기타14.jpg", label: "작품13" },
+      { id: "other-img-14", url: "/기타15.jpg", label: "작품14" },
+      { id: "other-img-15", url: "/기타16.jpg", label: "작품15" }
+    ],
+    result: "다양한 맞춤형 사이니지 솔루션 제공을 통해 각 브랜드의 시각적 경쟁력 및 고객 인지도 향상",
+    isPremium: false,
+    splitViewerEnabled: false,
+    x: 80,
+    y: 80
   }
 ];
+
+
 
 export const WORKFLOW_STEPS: WorkflowStep[] = [
   {
     id: 1,
-    title: "현장 레이저 실측 & 환경 분석",
+    title: "현장실측",
     subtitle: "STREET ANALYSIS & LASER MEASUREMENT",
-    desc: "현장 외장재 성분 파악 및 고화각 3D 레이저 거리 실측기를 활용하여 왜곡 없는 보행 시선 물리각 데이터를 도출합니다.",
+    desc: "현장 외장재 성분 파악, 외장재 타일 크기를 이용한 실측 적용, 추가적인 레이저 실측 및 사다리/크레인 사용을 통해 오차 없는 정밀 데이터를 도출합니다.",
     details: [
-      "초정밀 레이저 기반 반경 100m 시선 저해물질 완벽 추적 및 스캐닝",
-      "낮, 밤, 석양 등 자연광 가변 각도에 따른 외벽 음영 3D 시뮬레이션",
-      "관할 인허가 옥외광고 심의 규정(구청 법안) 선제 분석 및 안전 하중 진단"
+      "현장 외장재 성분 파악 및 고정 부위 구조 확인",
+      "외장재 타일 크기를 이용한 규격 실측 정밀 적용",
+      "추가적인 레이저 실측 및 사다리/크레인 사용을 통한 고소 부위 체크"
     ]
   },
   {
     id: 2,
-    title: "브랜드 에스테틱 & 3D 사인 디자인",
+    title: "컨셉 및 브랜드화 시안",
     subtitle: "CONCEPT DEVELOPMENT & 3D RENDERING",
     desc: "공간의 역사성과 브랜드 본질을 조립하여 폰트 에디팅, 맞춤 일러스트, 입체 두께(D) 시안을 가상 환경에 올립니다.",
     details: [
       "한글 및 영문 폰트 자간/두께 미세 모디파이 커스텀 서체 설계",
       "실제 건물 텍스처와 등색 맵을 복사해 주간/야간 전구색 온도 대비 3D 렌더 제공",
-      "우면/좌면/보행 등 각 동선별 조감도 및 시인거리별 가독 점수 진단표 산출"
+      "우면/좌면/보행 등 각 동선별 동선 조감도 및 시인거리별 가독 점수 진단표 산출"
     ]
   },
   {
     id: 3,
-    title: "재료 매칭, 조명 공학 & 시안 조율",
+    title: "재료매칭",
     subtitle: "SPECIFICATION & CLIENT WORKSHOP",
     desc: "클라이언트와 맞춤형 회의를 통해 황동 신주, 압축 알루 알로이, 동, 아크릴 등 디테일 자재 및 LED 모듈 광도(Lum) 세트를 정비합니다.",
     details: [
@@ -354,9 +636,9 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
   },
   {
     id: 4,
-    title: "헤어라인 메탈 용접 & 레이저 정전 가공",
+    title: "자재가공",
     subtitle: "CNC PRECISION MANUFACTURING",
-    desc: "자체 정전 특수 아크 도장 장비와 2.5KW 정밀 레이저 CNC 가공기를 통해 절단면 오차 0.2mm 이하의 명품 간판을 주조합니다.",
+    desc: "플렉스 프레임, 갈바절곡, 스텐절곡, 아크릴 등 용접 및 레이저 가공을 하여 설계한 대로 시공일정에 맞춰 준비합니다.",
     details: [
       "부식 방지를 위한 친환경 정전식 분체 열처리 특수 외장 코팅 적용",
       "금속 접합부 아르곤 고정밀 용접 및 흠집 소거용 헤어라인 샌딩 마무리 공정",
@@ -365,7 +647,7 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
   },
   {
     id: 5,
-    title: "크레인 스카이 하중 도킹 & 안심 수평 시공",
+    title: "고소장비 사용 및 설치",
     subtitle: "PROFESSIONAL SIGNAGE INSTALLATION",
     desc: "옥외광고 전문 라이선스를 가진 고도 로깅 숙련 시공 팀이 도심 번화가에서도 안전 규정을 준수하며 튼튼하게 장착합니다.",
     details: [
@@ -377,42 +659,16 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
 ];
 
 export const TOOL_SKILLS: ToolSkill[] = [
-  { name: "Adobe Illustrator (간판 벡터 도면 & 시안 설계)", level: 95 },
-  { name: "Adobe Photoshop (현장 실사 합성 & 텍스처링 및 라이팅)", level: 90 },
-  { name: "AutoCAD / Fusion 360 (입체 사인 정밀 용접/CNC 도면 설계)", level: 85 },
-  { name: "Adobe InDesign (가맹 시방서 및 브랜드 가이드북 퍼블리싱)", level: 80 },
-  { name: "Figma (상호작용 시뮬레이션 및 공간 브랜딩 웹 프로토타이핑)", level: 80 }
-];
-
-export const CERTIFICATIONS: Certification[] = [
-  {
-    title: "국가공인 옥외광고물관리사 자격 취득",
-    organization: "한국옥외광고협회",
-    date: "2015.08",
-    category: "자격증"
+  { 
+    name: "일러스트 (Adobe Illustrator)", 
+    level: 98,
+    desc: "색상설정, 컨셉도출 아이디어 설계, 현장사진을 이용한 3D 시뮬레이션 도출"
   },
-  {
-    title: "컴퓨터그래픽스운용기능사 자격 취득",
-    organization: "한국산업인력공단",
-    date: "2013.06",
-    category: "자격증"
-  },
-  {
-    title: "서울시 우수 공공디자인 옥외광고 부문 대상 수혜",
-    organization: "서울특별시",
-    date: "2022.11",
-    category: "수상"
-  },
-  {
-    title: "K-Design Award 옥외 공간 브랜딩 본상 수상 (Winner)",
-    organization: "K-Design 위원회",
-    date: "2023.08",
-    category: "수상"
-  },
-  {
-    title: "친환경 도시 재생 옥외광고 전문 엔지니어 수료",
-    organization: "국토교통 인재개발원",
-    date: "2019.04",
-    category: "교육이수"
+  { 
+    name: "포토샵 (Adobe Photoshop)", 
+    level: 98,
+    desc: "3D 시뮬레이션 라이팅, 배경 수정, 왜곡된 사진의 평면화, 생략, 삽입 컨셉에 다가가는 다양한 표현"
   }
 ];
+
+export const CERTIFICATIONS: Certification[] = [];

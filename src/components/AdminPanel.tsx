@@ -510,9 +510,14 @@ export default function AdminPanel({
 
   const handleSaveSkill = (e: React.FormEvent) => {
     e.preventDefault();
+    const existingDesc = (!isCreatingSkill && editingSkillIndex !== null && toolSkills[editingSkillIndex]) 
+      ? toolSkills[editingSkillIndex].desc 
+      : undefined;
+
     const targetSkill: ToolSkill = {
       name: sName || "새로운 실무 기술",
-      level: Number(sLevel)
+      level: Number(sLevel),
+      desc: existingDesc
     };
 
     let updatedList: ToolSkill[] = [];
@@ -681,16 +686,6 @@ export default function AdminPanel({
                 }`}
               >
                 <Hammer className="w-3.5 h-3.5" /> 엔지니어 툴 역량 ({toolSkills.length})
-              </button>
-              <button
-                onClick={() => setActiveTab("certs")}
-                className={`px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === "certs"
-                    ? "bg-red-950/40 text-red-400 border border-red-500/20"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                <Award className="w-3.5 h-3.5" /> 자격 및 수상 이력 ({certs.length})
               </button>
             </div>
 

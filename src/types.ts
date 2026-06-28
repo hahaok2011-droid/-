@@ -26,6 +26,7 @@ export interface Project {
   imgBeforeLabel?: string; // custom title for before image
   imgAfterLabel?: string;  // custom title for after image
   additionalImages?: { id: string; url: string; label: string }[];
+  detailImages?: { id: string; url: string; label: string }[];
   result: string;
   isPremium: boolean; // Locked behind premium access
   splitViewerEnabled: boolean; // Fragment partition viewer enabled for copyright protect
@@ -44,6 +45,9 @@ export interface WorkflowStep {
 export interface ToolSkill {
   name: string;
   level: number;
+  badge?: string;
+  desc?: string;
+  tags?: string[];
 }
 
 export interface Certification {
