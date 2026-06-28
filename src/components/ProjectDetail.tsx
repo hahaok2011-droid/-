@@ -81,11 +81,75 @@ export default function ProjectDetail({
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
+
+    // 0. 초고속 포커스 폴링 (15ms 간격) - OS 캡처 스니핑 도구 활성화 시 즉시 화면 은폐
+    let wasFocused = true;
+    const focusInterval = setInterval(() => {
+      const isFocused = document.hasFocus() && !document.hidden;
+      const stage = document.getElementById("hsw-protected-stage");
+      if (!stage) return;
+
+      if (!isFocused) {
+        stage.style.opacity = "0";
+        stage.style.filter = "blur(80px) brightness(0) contrast(0)";
+        stage.style.visibility = "hidden";
+        wasFocused = false;
+      } else if (!wasFocused && !document.body.getAttribute("data-key-pressed")) {
+        stage.style.opacity = "1";
+        stage.style.filter = "none";
+        stage.style.visibility = "visible";
+        wasFocused = true;
+      }
+    }, 15);
     
-    // Setup hotkey capture/print screen blockers
+    // 1. 명시적 불법 시도 시 강제 잠금 모달 트리거
+    const triggerInstantShield = () => {
+      setBlackoutActive(true);
+      const stage = document.getElementById("hsw-protected-stage");
+      if (stage) {
+        stage.style.opacity = "0";
+        stage.style.filter = "blur(80px) brightness(0) contrast(0)";
+        stage.style.visibility = "hidden";
+      }
+      try {
+        navigator.clipboard.writeText("🚫 [한석원 디자이너 IP 보호] 캡처 방지 프로세스에 의해 도면 복사 및 출력이 차단되었습니다.");
+      } catch (err) {}
+      const warningToast = document.getElementById("hswup-warning-toast");
+      if (warningToast) {
+        warningToast.style.opacity = "1";
+      }
+    };
+
+    const handleWindowBlur = () => {
+      const stage = document.getElementById("hsw-protected-stage");
+      if (stage) {
+        stage.style.opacity = "0";
+        stage.style.filter = "blur(80px) brightness(0) contrast(0)";
+        stage.style.visibility = "hidden";
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        const stage = document.getElementById("hsw-protected-stage");
+        if (stage) {
+          stage.style.opacity = "0";
+          stage.style.filter = "blur(80px) brightness(0) contrast(0)";
+          stage.style.visibility = "hidden";
+        }
+      }
+    };
+
+    // 3. 우클릭, 복사, 드래그, 선택 방지 프로세스 강제 차단
+    const preventCopyActions = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      triggerInstantShield();
+      return false;
+    };
+
+    // [핵심] 단축키가 눌려지는 '그 첫 순간(Meta, Ctrl, Alt, Shift, PrtScn 누르는 동기적 0ms)' 화면 즉시 블랙아웃
     const handleKeyDown = (e: KeyboardEvent) => {
-      const isCmdOrCtrl = e.metaKey || e.ctrlKey;
-      
       // ESC button close logic
       if (e.key === "Escape" || e.key === "Esc") {
         onClose();
@@ -95,42 +159,92 @@ export default function ProjectDetail({
       // Spacebar toggle slideshow
       if (e.key === " " && !isLocked) {
         setIsPlaying((prev) => !prev);
+        return;
       }
 
-      // Blackout when typical snapshot/export hotkeys are triggered
+      // OS 스크린샷 툴 단축키 조합의 시발점이 되는 보조키(Meta/Win, Control, Alt, PrintScreen) 감지 시 리렌더링 기다리지 않고 DOM 동기 즉시 차단
+      const isSecurityKey = 
+        e.key === "Meta" || 
+        e.key === "Control" || 
+        e.key === "Alt" || 
+        e.key === "PrintScreen" || 
+        e.key === "Snapshot" ||
+        e.key === "F12" || 
+        e.key === "F11" ||
+        e.metaKey || 
+        e.ctrlKey || 
+        e.altKey;
+
+      if (isSecurityKey) {
+        document.body.setAttribute("data-key-pressed", "true");
+        const stage = document.getElementById("hsw-protected-stage");
+        if (stage) {
+          stage.style.opacity = "0";
+          stage.style.filter = "blur(80px) brightness(0) contrast(0)";
+          stage.style.visibility = "hidden";
+        }
+      }
+
+      const isCmdOrCtrl = e.metaKey || e.ctrlKey;
       if (
         e.key === "PrintScreen" || 
         e.key === "Snapshot" ||
         (isCmdOrCtrl && e.key === "p") ||
+        (isCmdOrCtrl && e.key === "P") ||
         (isCmdOrCtrl && e.key === "s") ||
+        (isCmdOrCtrl && e.key === "S") ||
         (isCmdOrCtrl && e.key === "c") ||
+        (isCmdOrCtrl && e.key === "C") ||
+        (isCmdOrCtrl && e.key === "u") ||
         e.key === "F12" ||
-        (isCmdOrCtrl && e.shiftKey && e.key === "s") ||
-        (isCmdOrCtrl && e.shiftKey && e.key === "4")
+        (isCmdOrCtrl && e.shiftKey)
       ) {
-        setBlackoutActive(true);
-        const warningToast = document.getElementById("hswup-warning-toast");
-        if (warningToast) {
-          warningToast.style.opacity = "1";
-          setTimeout(() => {
-            warningToast.style.opacity = "0";
-          }, 3000);
+        e.preventDefault();
+        e.stopPropagation();
+        triggerInstantShield();
+      }
+    };
+
+    // 키보드에서 손을 뗐을 때 원복 (단, 잠금 상태가 아닐 때만)
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "PrintScreen" || e.key === "Snapshot") {
+        triggerInstantShield();
+        return;
+      }
+      
+      // 보조키 모두 해제 시 동기적 은폐 해제
+      if (!e.metaKey && !e.ctrlKey && !e.altKey) {
+        document.body.removeAttribute("data-key-pressed");
+        const stage = document.getElementById("hsw-protected-stage");
+        if (stage && document.hasFocus() && !document.hidden) {
+          stage.style.opacity = "1";
+          stage.style.filter = "none";
+          stage.style.visibility = "visible";
         }
       }
     };
 
-    const handleKeyUp = () => {
-      setBlackoutActive(false);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", handleWindowBlur);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("keyup", handleKeyUp, true);
+    window.addEventListener("contextmenu", preventCopyActions, true);
+    window.addEventListener("copy", preventCopyActions, true);
+    window.addEventListener("dragstart", preventCopyActions, true);
+    window.addEventListener("selectstart", preventCopyActions, true);
     
     return () => {
       document.body.style.overflow = "unset";
       clearInterval(interval);
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      clearInterval(focusInterval);
+      window.removeEventListener("blur", handleWindowBlur);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("keyup", handleKeyUp, true);
+      window.removeEventListener("contextmenu", preventCopyActions, true);
+      window.removeEventListener("copy", preventCopyActions, true);
+      window.removeEventListener("dragstart", preventCopyActions, true);
+      window.removeEventListener("selectstart", preventCopyActions, true);
     };
   }, [onClose, isLocked]);
 
@@ -355,18 +469,36 @@ export default function ProjectDetail({
             )}
 
             {/* MASSIVE IMMERSIVE CENTER CANVAS STAGE */}
-            <div className="w-full h-full grid place-items-center p-2 md:p-6 relative">
+            <div id="hsw-protected-stage" className="w-full h-full grid place-items-center p-2 md:p-6 relative transition-all duration-75">
               
               {/* Active print-screen / capture blackout protector mask */}
               {blackoutActive && (
-                <div className="absolute inset-4 bg-black/99 border border-red-500/60 z-50 rounded-2xl flex flex-col items-center justify-center p-6 text-center shadow-2xl backdrop-blur-3xl">
-                  <ShieldCheck className="w-16 h-16 text-red-500 animate-bounce mb-4" />
-                  <h4 className="text-white font-mono text-sm md:text-base font-black tracking-widest uppercase mb-2">
-                    ⚠️ SECURITY SHIELD ENGAGED / 원본 지식재산 보호 차단막 작동
-                  </h4>
-                  <p className="text-zinc-400 text-xs max-w-md leading-relaxed">
-                    디자이너의 핵심 설계 도면 및 로고 자산 보호를 위해 단축키 캡처 시도 시 원본 도면을 차단합니다.
-                  </p>
+                <div className="absolute inset-0 bg-black z-[999999] flex flex-col items-center justify-center p-6 text-center shadow-2xl pointer-events-auto select-none">
+                  <div className="max-w-md w-full bg-zinc-900/95 border border-red-500/80 p-8 rounded-3xl shadow-2xl backdrop-blur-3xl flex flex-col items-center animate-scale-up">
+                    <ShieldCheck className="w-20 h-20 text-red-500 animate-bounce mb-5" />
+                    <h4 className="text-white font-mono text-base md:text-lg font-black tracking-widest uppercase mb-3 text-red-400">
+                      ⚠️ SECURITY SHIELD ENGAGED
+                    </h4>
+                    <p className="text-zinc-200 text-sm font-bold mb-2">
+                      화면 캡처 / 외부 유틸리티 녹화 시도가 감지되었습니다.
+                    </p>
+                    <p className="text-zinc-400 text-xs leading-relaxed mb-8 break-keep">
+                      한석원 디자이너의 핵심 간판 벡터 도면 및 고해상도 그래픽 지식재산권(IP) 보호를 위해 방지 프로세스가 작동하여 도면 출력을 즉시 차단했습니다.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setBlackoutActive(false);
+                        const stage = document.getElementById("hsw-protected-stage");
+                        if (stage) {
+                          stage.style.opacity = "1";
+                          stage.style.filter = "none";
+                        }
+                      }}
+                      className="w-full py-4 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-mono font-black text-sm rounded-xl transition-all shadow-lg hover:shadow-red-600/30 cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <Lock className="w-4 h-4" /> 도면 보호 확인 (클릭 시 화면 복귀)
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -393,12 +525,12 @@ export default function ProjectDetail({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1.2, ease: "easeInOut" }}
-                    className="col-start-1 row-start-1 relative max-w-full max-h-[82vh] flex items-center justify-center pointer-events-none select-none"
+                    className="col-start-1 row-start-1 relative max-w-full max-h-[82vh] flex items-center justify-center select-none overflow-hidden rounded-2xl bg-black/40"
                   >
                     <img
                       src={activeImage.url}
                       alt={activeImage.label}
-                      className="max-w-full max-h-[80vh] object-contain select-none pointer-events-none drop-shadow-[0_20px_60px_rgba(0,0,0,0.95)]"
+                      className="max-w-full max-h-[80vh] object-contain select-none pointer-events-none drop-shadow-[0_20px_60px_rgba(0,0,0,0.95)] relative z-0"
                       referrerPolicy="no-referrer"
                     />
                   </motion.div>

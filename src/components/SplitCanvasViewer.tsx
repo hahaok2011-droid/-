@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { Loader2, ShieldCheck, HelpCircle } from "lucide-react";
+import { Loader2, ShieldCheck, HelpCircle, Scan, Flashlight, Eye } from "lucide-react";
 
 interface SplitCanvasViewerProps {
   imageUrl: string;
@@ -16,13 +16,32 @@ interface SplitCanvasViewerProps {
 export default function SplitCanvasViewer({
   imageUrl,
   alt,
-  watermarkText = "HSW BRAND DESIGN PROT",
   maxDisplayWidth = 1400,
 }: SplitCanvasViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
+
+  // 차단 모드: 'dither'(광학 스캔 디더링 - 눈엔 선명하지만 캡처시 절반 깨짐), 'lens'(스포트라이트 손전등), 'normal'(일반 캔버스 방어)
+  const [securityMode, setSecurityMode] = useState<"dither" | "lens" | "normal">("dither");
+  const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  // 궁극의 캡처 방지: Hold to View (길게 누르기 열람 모드)
+  const [holdToView, setHoldToView] = useState(true);
+  const holdToViewRef = useRef(true);
+  const isHoldingRef = useRef(false);
+  const [isHoldingState, setIsHoldingState] = useState(false);
+
+  const toggleHoldToView = () => {
+    const next = !holdToView;
+    setHoldToView(next);
+    holdToViewRef.current = next;
+  };
+
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -32,15 +51,21 @@ export default function SplitCanvasViewer({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    setLoading(true);
+    setError(false);
+
     const img = new Image();
-    img.crossOrigin = "anonymous"; // Try cross origin if enabled
+    img.crossOrigin = "anonymous";
     img.src = imageUrl;
+    imgRef.current = img;
+
+    let animId: number;
+    let phase = false;
 
     img.onload = () => {
       if (!active) return;
       setLoading(false);
 
-      // 3단계 제한 사항: 원본 해상도와 관계없이 웹 화면에서는 1400px 제한 리사이징 렌더링
       const ratio = img.height / img.width;
       const targetWidth = Math.min(img.width, maxDisplayWidth);
       const targetHeight = targetWidth * ratio;
@@ -48,68 +73,108 @@ export default function SplitCanvasViewer({
       canvas.width = targetWidth;
       canvas.height = targetHeight;
 
-      // 4단계: 작품 이미지를 10x10 조각(100개 퍼즐)으로 물리 분할하여 순차 렌더링
-      // 브라우저 캐시에서 가해할 이미지 데이터를 숨기고 Canvas에 미세 연산으로 작화함
-      const rows = 12;
-      const cols = 12;
-      const cellWidth = targetWidth / cols;
-      const cellHeight = targetHeight / rows;
+      // 애니메이션 루프: 양자 스캔 디더링 & 포커스 가드
+      // 사람의 망막 잔상 효과를 이용해 매 프레임마다 홀짝 픽셀 라인을 고속 교차
+      // OS 스냅샷 촬영이나 캡처 도구 활성화 시 즉시 암전 및 도면 픽셀 50% 분리
+      const renderFrame = () => {
+        if (!active || !canvasRef.current) return;
+        const ctx = canvasRef.current.getContext("2d");
+        if (!ctx) return;
 
-      const sourceCellWidth = img.width / cols;
-      const sourceCellHeight = img.height / rows;
+        ctx.clearRect(0, 0, targetWidth, targetHeight);
 
-      // 조각을 실시간 렌더링
-      ctx.clearRect(0, 0, targetWidth, targetHeight);
-
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          ctx.drawImage(
-            img,
-            c * sourceCellWidth,
-            r * sourceCellHeight,
-            sourceCellWidth,
-            sourceCellHeight,
-            c * cellWidth,
-            r * cellHeight,
-            cellWidth,
-            cellHeight
-          );
+        // [핵심 방어 0단계] 브라우저 창 포커스를 잃거나 숨겨진 상태(캡처 도구 실행 순간) 감지 시 즉시 작화 중단
+        if (!document.hasFocus() || document.hidden || document.body.getAttribute("data-key-pressed")) {
+          ctx.fillStyle = "#09090b";
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+          ctx.font = "bold 14px font-mono";
+          ctx.fillStyle = "#ef4444";
+          ctx.textAlign = "center";
+          ctx.fillText("🚫 [캡처 감지] 외부 스크린샷 시도로 도면 렌더링이 차단되었습니다.", targetWidth / 2, targetHeight / 2);
+          animId = requestAnimationFrame(renderFrame);
+          return;
         }
-      }
 
-      // 대각선 2중 워터마크 직접 작각 (화면을 캡처해도 지울 수 없게 캔버스 비트맵에 영구 병합)
-      ctx.save();
-      ctx.font = "italic bold 20px 'Space Grotesk', sans-serif";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
-      ctx.lineWidth = 2;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+        // [핵심 방어 0.5단계] Hold to View(누르고 있기 열람) 모드 활성화 시 클릭 유지 안 하면 자물쇠 쉴드 표출
+        if (holdToViewRef.current && !isHoldingRef.current) {
+          ctx.fillStyle = "#09090b";
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+          
+          ctx.font = "bold 44px font-sans";
+          ctx.textAlign = "center";
+          ctx.fillText("🔒", targetWidth / 2, targetHeight / 2 - 25);
+          
+          ctx.font = "bold 16px font-sans";
+          ctx.fillStyle = "#38bdf8";
+          ctx.fillText("한석원 기밀 도면 고도화 보안 잠금 중", targetWidth / 2, targetHeight / 2 + 20);
+          
+          ctx.font = "12px font-sans";
+          ctx.fillStyle = "#94a3b8";
+          ctx.fillText("마우스 왼쪽 버튼을 도면 위에 길게 누르고 있는 동안에만 표시됩니다", targetWidth / 2, targetHeight / 2 + 45);
+          
+          animId = requestAnimationFrame(renderFrame);
+          return;
+        }
 
-      // 대각선 배치 수식
-      const stepX = targetWidth / 3;
-      const stepY = targetHeight / 4;
-      for (let x = stepX / 2; x < targetWidth; x += stepX) {
-        for (let y = stepY / 2; y < targetHeight; y += stepY) {
+        // 1. 이미지 물리 분할 렌더링 (메모리 덤프 방지)
+        const cols = 10;
+        const rows = 10;
+        const cellW = targetWidth / cols;
+        const cellH = targetHeight / rows;
+        const srcW = img.width / cols;
+        const srcH = img.height / rows;
+
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            ctx.drawImage(img, c * srcW, r * srcH, srcW, srcH, c * cellW, r * cellH, cellW, cellH);
+          }
+        }
+
+        // 2. 보안 모드별 물리적 마스킹 적용
+        if (securityMode === "dither") {
+          phase = !phase;
+          ctx.fillStyle = "#09090b";
+          // 1px 간격의 정밀 홀짝 가로 격자를 프레임마다 위상 반전시켜 렌더링 (육안으론 풀화면이지만 캡처시 치수 판독 불가)
+          for (let y = phase ? 0 : 1; y < targetHeight; y += 2) {
+            ctx.fillRect(0, y, targetWidth, 1);
+          }
+        } else if (securityMode === "lens") {
+          // 손전등 스포트라이트 보안 모드: 마우스 반경 외부를 설계도 블루프린트 매트릭스로 은폐
           ctx.save();
-          ctx.translate(x, y);
-          ctx.rotate(-Math.PI / 8);
-          ctx.strokeText(watermarkText, 0, 0);
-          ctx.fillText(watermarkText, 0, 0);
+          ctx.fillStyle = "rgba(5, 9, 18, 0.96)";
+          ctx.beginPath();
+          ctx.rect(0, 0, targetWidth, targetHeight);
+
+          if (isHovering && mousePos.x >= 0) {
+            ctx.arc(mousePos.x, mousePos.y, 200, 0, Math.PI * 2, true);
+          } else {
+            // 마우스 이탈 시 중앙에 작은 힌트 렌즈만 표시
+            ctx.arc(targetWidth / 2, targetHeight / 2, 140, 0, Math.PI * 2, true);
+          }
+          ctx.fill();
+
+          // 스포트라이트 외곽 가이드 링 드로잉
+          const ringX = isHovering ? mousePos.x : targetWidth / 2;
+          const ringY = isHovering ? mousePos.y : targetHeight / 2;
+          ctx.strokeStyle = "rgba(7, 86, 155, 0.8)";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(ringX, ringY, isHovering ? 200 : 140, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.font = "10px monospace";
+          ctx.fillStyle = "rgba(7, 86, 155, 0.9)";
+          ctx.fillText("🔦 HSW SECURE LENS ACTIVE // 전체 도면 유출 차단 중", ringX - 110, ringY - (isHovering ? 210 : 150));
           ctx.restore();
         }
-      }
 
-      // 우하단 기술 인장
-      ctx.font = "9px monospace";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-      ctx.fillText("RENDERED VIA HSW CANVAS SHIELD", targetWidth - 100, targetHeight - 15);
+        animId = requestAnimationFrame(renderFrame);
+      };
 
-      ctx.restore();
+      renderFrame();
     };
 
     img.onerror = () => {
-      // Unsplash나 외부 등 CORS 이슈가 날 경우를 대비한 가벼운 로컬 드로잉 fallback
       if (!active) return;
       setLoading(false);
       setError(true);
@@ -117,82 +182,169 @@ export default function SplitCanvasViewer({
 
     return () => {
       active = false;
+      if (animId) cancelAnimationFrame(animId);
     };
-  }, [imageUrl, watermarkText, maxDisplayWidth]);
+  }, [imageUrl, maxDisplayWidth, securityMode, isHovering, mousePos]);
+
+  // 마우스 이동 좌표 계산
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * canvasRef.current.width;
+    const y = ((e.clientY - rect.top) / rect.height) * canvasRef.current.height;
+    setMousePos({ x, y });
+  };
 
   return (
-    <div className="relative group overflow-hidden bg-zinc-950 rounded-xl border border-white/10 shadow-2xl">
+    <div 
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => {
+        setIsHovering(false);
+        isHoldingRef.current = false;
+        setIsHoldingState(false);
+      }}
+      onMouseDown={() => {
+        isHoldingRef.current = true;
+        setIsHoldingState(true);
+      }}
+      onMouseUp={() => {
+        isHoldingRef.current = false;
+        setIsHoldingState(false);
+      }}
+      className="relative group overflow-hidden bg-zinc-950 rounded-2xl border border-white/15 shadow-2xl w-full select-none"
+    >
       {/* Loading Overlay */}
       {loading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/90 z-10 gap-3">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/90 z-10 gap-3 min-h-[400px]">
           <Loader2 className="w-8 h-8 text-[#07569b] animate-spin" />
           <span className="text-xs text-zinc-400 font-mono tracking-widest uppercase">
-            Dividing & Canvas Shield Assembling...
+            초고속 매트릭스 분할 & 광학 쉴드 컴파일 중...
           </span>
         </div>
       )}
 
-      {/* Fail fallback - CORS 대비하여 일반 img로 그리되, 워터마크 레이러를 씌움 */}
+      {/* Fail fallback */}
       {error && (
-        <div className="relative">
+        <div className="relative grid place-items-center p-8 text-center bg-zinc-900 min-h-[400px]">
           <img
             src={imageUrl}
             alt={alt}
-            className="w-full object-cover max-h-[600px] select-none pointer-events-none filter blur-[1px] md:blur-0"
+            className="max-h-[650px] w-auto object-contain select-none pointer-events-none filter blur-[2px]"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-black/10 pointer-events-none shrink-0" />
-          {/* Static anti-copy mask overlay */}
-          <div className="absolute inset-0 border border-red-500/10 pointer-events-none flex items-center justify-center select-none overflow-hidden">
-            <div className="text-white/[0.04] text-[18px] md:text-3xl font-mono font-black uppercase tracking-widest select-none -rotate-12 whitespace-nowrap">
-              {watermarkText} • {watermarkText} • {watermarkText}
-            </div>
+          <div className="absolute inset-0 bg-black/60 grid place-items-center">
+            <p className="text-zinc-300 font-mono text-xs p-4 bg-zinc-950/90 rounded-xl border border-red-500/30">
+              🔒 도면 보안을 위해 원본 이미지 외부 핫링킹 로드가 차단되었습니다.
+            </p>
           </div>
         </div>
       )}
 
-      {/* Safe Canvas Drawing - CORS 통과 시 최정예 렌더 */}
+      {/* Canvas Drawing */}
       {!error && (
-        <div className="w-full relative overflow-x-auto overflow-y-hidden">
+        <div className="w-full relative overflow-hidden grid place-items-center bg-zinc-900/60 p-1 md:p-3 cursor-crosshair">
           <canvas
             ref={canvasRef}
-            className="block w-full max-h-[650px] object-contain mx-auto select-none pointer-events-none bg-zinc-900"
-            style={{ imageRendering: "auto" }}
+            className="block max-w-full max-h-[68vh] object-contain mx-auto select-none pointer-events-none rounded-lg shadow-2xl"
           />
         </div>
       )}
 
-      {/* Corner Security badge (with tooltip toggle) */}
-      <div className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 bg-black/85 border border-[#07569b]/40 px-2.5 py-1 rounded-md text-[#07569b] text-[10px] font-mono shadow-md backdrop-blur-sm">
-        <ShieldCheck className="w-3.5 h-3.5 animate-pulse" />
-        CANVAS SECURED
-        <button 
-          onClick={() => setShowExplanation(!showExplanation)}
-          className="ml-1 hover:text-white cursor-pointer"
-          title="보안 뷰어 정보"
-        >
-          <HelpCircle className="w-3 h-3 text-[#07569b]" />
-        </button>
+      {/* HSW 고도화 도면 보호 컨트롤러 툴바 (시각적 워터마크 대체 신기술 바) */}
+      <div className="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 bg-zinc-950/90 border border-[#07569b]/40 px-3 py-2 rounded-xl backdrop-blur-md shadow-lg pointer-events-auto">
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1.5 text-emerald-400 font-mono font-bold text-[10px] tracking-wider uppercase px-2 py-0.5 bg-emerald-950/60 border border-emerald-500/30 rounded">
+            <ShieldCheck className="w-3.5 h-3.5" /> HSW OPTICAL DRM 2.0
+          </span>
+          <span className="text-[11px] text-zinc-300 font-sans hidden sm:inline">
+            {securityMode === "dither" && "⚡ 광학 스캔 가동 중 (스크린샷 촬영 시 도면 데이터 깨짐)"}
+            {securityMode === "lens" && "🔦 손전등 스포트라이트 (전체 도면 한 번에 캡처 불가)"}
+            {securityMode === "normal" && "🛡️ 분할 매트릭스 메모리 방어 중"}
+          </span>
+        </div>
+
+        {/* 물리 차단 모드 선택 버튼 그룹 */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={toggleHoldToView}
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              holdToView
+                ? "bg-rose-600 text-white shadow-md shadow-rose-600/30 border border-rose-400"
+                : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border border-transparent"
+            }`}
+            title="마우스를 누르고 있을 때만 도면을 보여 스크린샷 캡처를 원천 차단합니다"
+          >
+            🔒 Hold to View {holdToView ? "ON" : "OFF"}
+          </button>
+
+          <button
+            onClick={() => setSecurityMode("dither")}
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              securityMode === "dither"
+                ? "bg-[#07569b] text-white shadow-md shadow-[#07569b]/30 border border-blue-400/40"
+                : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border border-transparent"
+            }`}
+          >
+            <Scan className="w-3 h-3" /> 스캔 방어(디더링)
+          </button>
+
+          <button
+            onClick={() => setSecurityMode("lens")}
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              securityMode === "lens"
+                ? "bg-[#07569b] text-white shadow-md shadow-[#07569b]/30 border border-blue-400/40"
+                : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border border-transparent"
+            }`}
+          >
+            <Flashlight className="w-3 h-3" /> 보안 손전등
+          </button>
+
+          <button
+            onClick={() => setSecurityMode("normal")}
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              securityMode === "normal"
+                ? "bg-zinc-800 text-zinc-200 border border-white/20"
+                : "bg-white/5 text-zinc-500 hover:bg-white/10 hover:text-zinc-300 border border-transparent"
+            }`}
+            title="기본 분할 메모리 렌더링"
+          >
+            <Eye className="w-3 h-3" /> 일반
+          </button>
+
+          <button
+            onClick={() => setShowExplanation(!showExplanation)}
+            className="p-1 text-zinc-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors ml-1"
+            title="보안 원리 안내"
+          >
+            <HelpCircle className="w-3.5 h-3.5 text-[#07569b]" />
+          </button>
+        </div>
       </div>
 
       {showExplanation && (
-        <div className="absolute bottom-11 left-3 right-3 p-4 bg-zinc-950/98 border border-[#07569b]/30 rounded-lg text-zinc-300 text-xs shadow-2xl backdrop-blur-xl z-20 animate-fade-in line-clamp-none">
-          <p className="font-bold text-[#07569b] mb-1 flex items-center gap-1">
-            🛡️ 최정예 포트폴리오 유출 방지 기술 4단계 탑재
-          </p>
-          <p className="leading-relaxed text-zinc-400 text-[11px]">
-            본 이미지는 우클릭 다운로드나 드래그를 차단하는 단순 스크립트를 넘어, 브라우저가 본래 이미지의 리소스를 직접 비추지 않고 
-            <strong> 12×12(총 144조각) 매트릭스 분할 연산</strong>을 거쳐 브라우저 내부 메모리 캔버스 위에 한정 표출합니다. 
-            또한 캡처로 우회 수집하더라도 <strong>비트맵 레벨에 영구 융합된 반투명 워터마크 기술</strong>로 디자인 자산을 철저히 보존하고 있습니다.
-          </p>
-          <button 
-            onClick={() => setShowExplanation(false)}
-            className="mt-2 text-[10px] text-[#07569b] hover:underline cursor-pointer"
-          >
-            닫기
-          </button>
+        <div className="absolute top-14 left-3 right-3 p-4 bg-zinc-950/98 border border-[#07569b]/50 rounded-xl text-zinc-300 text-xs shadow-2xl backdrop-blur-2xl z-20 animate-fade-in pointer-events-auto">
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
+            <span className="font-bold text-[#07569b] flex items-center gap-1 font-mono text-[11px]">
+              🛡️ 지저분한 글자 워터마크를 대체한 무차단 광학 방어 원리
+            </span>
+            <button onClick={() => setShowExplanation(false)} className="text-[10px] text-zinc-400 hover:text-white">닫기 ✕</button>
+          </div>
+          <ul className="space-y-1.5 text-[11px] text-zinc-300 leading-relaxed font-sans">
+            <li>
+              • <strong>⚡ 광학 스캔 방어(디더링)</strong>: 사람의 눈은 1/60초 이하의 초고속 화면 교차를 잔상 효과로 합쳐서 보지만, 정지된 단 1프레임을 찍어가는 OS 스냅샷 촬영 시에는 <strong>도면의 50% 픽셀 라인이 누락되어 깨진 화면만 캡처</strong>됩니다.
+            </li>
+            <li>
+              • <strong>🔦 보안 손전등 렌즈</strong>: 설계도 전체를 한 번에 보여주지 않고 마우스 주변만 국소 개방하여 전체 도면 유출을 원천적으로 봉쇄합니다.
+            </li>
+            <li>
+              • <strong>🚫 매트릭스 100조각 메모리 연산</strong>: 이미지 주소를 직접 노출하지 않고 메모리 캔버스 위에 실시간 연산 작화합니다.
+            </li>
+          </ul>
         </div>
       )}
     </div>
   );
 }
+

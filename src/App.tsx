@@ -109,7 +109,7 @@ export default function App() {
     }
 
     // 3. Tool Skills
-    const cachedSkills = localStorage.getItem("hsw_skills_v3");
+    const cachedSkills = localStorage.getItem("hsw_skills_v2026_final_art");
     if (cachedSkills) {
       try {
         setToolSkills(JSON.parse(cachedSkills));
@@ -118,7 +118,7 @@ export default function App() {
       }
     } else {
       setToolSkills(TOOL_SKILLS);
-      localStorage.setItem("hsw_skills_v3", JSON.stringify(TOOL_SKILLS));
+      localStorage.setItem("hsw_skills_v2026_final_art", JSON.stringify(TOOL_SKILLS));
     }
 
     // 4. Certifications
@@ -156,7 +156,7 @@ export default function App() {
 
   const handleUpdateSkills = (updated: ToolSkill[]) => {
     setToolSkills(updated);
-    localStorage.setItem("hsw_skills_v3", JSON.stringify(updated));
+    localStorage.setItem("hsw_skills_v2026_final_art", JSON.stringify(updated));
   };
 
   const handleUpdateCerts = (updated: Certification[]) => {
@@ -178,6 +178,8 @@ export default function App() {
     localStorage.removeItem("hsw_skills");
     localStorage.removeItem("hsw_skills_v2");
     localStorage.removeItem("hsw_skills_v3");
+    localStorage.removeItem("hsw_skills_v5_final");
+    localStorage.removeItem("hsw_skills_v2026_final_art");
     localStorage.removeItem("hsw_certs");
     setProjects(INITIAL_PROJECTS);
     setWorkflowSteps(WORKFLOW_STEPS);

@@ -39,3 +39,29 @@ body {
   background-image: radial-gradient(circle at 1px 1px, rgba(7, 86, 155, 0.06) 1px, transparent 0);
   background-size: 40px 40px;
 }
+
+/* 글로벌 지식재산 보호 강력 인쇄 차단 및 전역 복사 금지 */
+@media print {
+  html, body {
+    display: none !important;
+    visibility: hidden !important;
+    background: #000 !important;
+  }
+}
+
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
